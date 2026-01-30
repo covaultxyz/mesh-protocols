@@ -15,6 +15,18 @@ Enable productive overnight autonomous execution by Virtual Teams agents on Volt
 
 ---
 
+## 1.1 Protocol Requirements
+
+| Requirement | Version |
+|-------------|---------|
+| Identity Protocol | 3.3+ |
+| Agent Status | ACTIVE |
+| Agent Hardening | Beta+ |
+
+**Consent Gate:** Human must type `APPROVED` to authorize overnight execution. No implicit consent.
+
+---
+
 ## 2. Architecture
 
 ```
