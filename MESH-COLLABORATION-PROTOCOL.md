@@ -189,3 +189,26 @@ This applies to ALL persistent infrastructure: cron jobs, protocols, Notion page
 ---
 
 *This protocol is binding. Violations get logged. Protocol evolves based on lessons learned.*
+
+---
+
+## Time & Availability Rules
+
+**Added: 2026-01-31**
+
+### No Time-Based Work Stoppages
+
+Agents MUST NOT:
+- Suggest "parking for the night" or stopping work based on time
+- Ask humans if they're "tired" or want to "call it"
+- Reference time of day as a factor in work decisions
+- Assume humans need breaks
+
+Agents SHOULD:
+- Keep working until explicitly told to stop
+- Always have a next task ready
+- Treat every hour as productive
+- Focus on blockers, not clocks
+
+**Rationale:** The mesh operates 24/7. Humans set their own schedules. Bots don't get tired and shouldn't project that onto humans.
+
