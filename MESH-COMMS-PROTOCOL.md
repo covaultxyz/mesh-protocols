@@ -283,7 +283,32 @@ python auth.py  # Re-authenticate
 
 ---
 
-## 10. CHANGELOG
+## 10. DOCUMENTATION PROTOCOL
+
+### 10.1 Source of Truth Hierarchy
+```
+Notion (Primary) → GitHub (Sync/Mirror)
+```
+
+- **Notion** = Source of truth for all protocols
+- **GitHub** = Synced backup, version control
+- **Edits** = Make in Notion first, then sync to GitHub
+
+### 10.2 Protocol Storage Locations
+| Type | Location |
+|------|----------|
+| Master protocols | Covault Notion → "Protocols Under Development" |
+| Protocol Office | Covault Notion → Virtual Teams → Protocol Office |
+| GitHub mirror | `covaultxyz/mesh-protocols` |
+
+### 10.3 Sync Procedure
+1. Update protocol in Notion
+2. Export/copy to GitHub repo
+3. Commit with reference to Notion page ID
+
+---
+
+## 11. CHANGELOG
 
 | Date | Version | Changes |
 |------|---------|---------|
