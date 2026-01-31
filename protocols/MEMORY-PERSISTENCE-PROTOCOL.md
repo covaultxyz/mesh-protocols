@@ -188,11 +188,30 @@ did stuff with protocols
 
 ---
 
+## Integration with Mesh Collaboration
+
+This protocol links to [MESH-COLLABORATION-PROTOCOL.md](../MESH-COLLABORATION-PROTOCOL.md):
+
+- **Pre-Automation Sync** — Before creating any automation, follow the collaboration protocol
+- **Protocol Refresh Job** — Runs every 6h to sync protocols and detect drift
+- **STATE.md** — Tracks all active automations across both agents
+- **Cross-Agent Memory** — Shared files stay in sync via git
+
+### Active Automation Tracking
+
+All cron jobs, watchers, and persistent scripts must be logged in:
+1. `STATE.md` — Current state (what's running now)
+2. `memory/YYYY-MM-DD.md` — Historical record (when created/modified)
+3. `heartbeat-state.json` — Health check timestamps
+
+---
+
 ## Version History
 
 | Version | Date | Changes |
 |---------|------|---------|
 | 1.0 | 2026-01-31 | Initial protocol |
+| 1.1 | 2026-01-31 | Added integration with MESH-COLLABORATION-PROTOCOL.md |
 
 ---
 

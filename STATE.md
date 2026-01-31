@@ -64,6 +64,17 @@
 
 ---
 
+## ⚙️ Active Automations
+
+| Name | Schedule | Owner | Purpose |
+|------|----------|-------|---------|
+| protocol-refresh | `0 */6 * * *` (6h) | Oracle | Sync protocols, detect drift |
+| heartbeat | `*/30 * * * *` (30m) | Oracle | System health, proactive checks |
+
+*See MESH-COLLABORATION-PROTOCOL.md for rules on adding new automations*
+
+---
+
 ## 🔧 New Tools Available
 
 ### Activity Logger

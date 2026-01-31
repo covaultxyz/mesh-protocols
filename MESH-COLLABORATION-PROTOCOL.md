@@ -1,10 +1,10 @@
-# Mesh Collaboration Protocol v1.2
+# Mesh Collaboration Protocol v1.3
 
-**Updated:** 2026-01-31 19:57 UTC
+**Updated:** 2026-01-31 20:40 UTC
 **Last Reviewed:** 2026-01-31
 **Authors:** Cassian Sandman + Oracle
 **Status:** ACTIVE
-**Changelog:** v1.2 — Added "propose before building" lesson, review header for cron scanner
+**Changelog:** v1.3 — Added Agent Persistence link, protocol-refresh cron (6h)
 
 ---
 
@@ -103,21 +103,6 @@ After automation is live:
 3. **Test together** → Confirm other agent can observe/interact
 4. **Log in Mesh Work Log** → Notion entry for tracking
 
-## Automation Rules (Legacy — see above)
-
-**Before creating:**
-- Cron jobs
-- Webhook handlers
-- Protocol documents
-- Notion databases/pages
-- Any persistent infrastructure
-
-**Must:**
-1. Post `🤝 COORD CHECK:` in Telegram
-2. Wait for response (max 2 min)
-3. Confirm no duplicate exists
-4. Proceed with single owner
-
 ---
 
 ## When Parallel Work is OK
@@ -142,12 +127,26 @@ If duplicate work detected:
 
 ---
 
-## Protocol Refresh
+## Integration with Agent Persistence
 
-To keep this protocol active in memory:
-- Re-read at session start
-- Cron job reminder (Oracle owns)
-- After any lapse, re-read and log lesson
+This protocol links to [MEMORY-PERSISTENCE-PROTOCOL.md](./protocols/MEMORY-PERSISTENCE-PROTOCOL.md):
+
+- **STATE.md** — Track all active automations (cron jobs, watchers)
+- **memory/YYYY-MM-DD.md** — Log automation creation/changes
+- **heartbeat-state.json** — Track automation health check timestamps
+- **learning-log.md** — Document collaboration lessons
+
+### Protocol Refresh Automation
+
+| Job | Schedule | Owner | Purpose |
+|-----|----------|-------|---------|
+| `protocol-refresh` | `0 */6 * * *` | Oracle | Pull git, verify STATE.md, detect drift |
+
+The cron job runs every 6 hours to:
+1. Pull latest protocols from git
+2. Verify automations match STATE.md
+3. Alert mesh group if drift detected
+4. Update heartbeat-state.json
 
 ---
 
@@ -175,7 +174,8 @@ This applies to ALL persistent infrastructure: cron jobs, protocols, Notion page
 |------|---------------|-------------|
 | 2026-01-31 | Both created mesh health check cron jobs | Added COORD CHECK rule |
 | 2026-01-31 | Both proposed health check solutions independently | Added "REVIEW don't duplicate" rule |
-| 2026-01-31 | Discovered need for "propose before building" pattern | Added Key Lessons Learned section (this one) |
+| 2026-01-31 | Discovered need for "propose before building" pattern | Added Key Lessons Learned section |
+| 2026-01-31 | Both created MESH-COLLABORATION-PROTOCOL.md | Merged v1.2 + v1.1 → v1.3 (ironic, but we learned!) |
 
 ---
 
@@ -183,6 +183,7 @@ This applies to ALL persistent infrastructure: cron jobs, protocols, Notion page
 
 - Mesh Work Plan Audit: [Notion](https://www.notion.so/Mesh-Work-Plan-Audit-2f935e812bbb817ab47beba1d821c564)
 - MESH-COMMS-PROTOCOL.md — technical connectivity
+- MEMORY-PERSISTENCE-PROTOCOL.md — agent context preservation
 - Agent Persistence Work Plan — protocol refresh ties to context preservation
 
 ---
