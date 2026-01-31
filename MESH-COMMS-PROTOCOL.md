@@ -283,3 +283,56 @@ tail -100 /tmp/clawdbot/clawdbot-$(date +%Y-%m-%d).log
 ---
 
 *This document is the source of truth for mesh communications. Update it as the architecture evolves.*
+
+---
+
+## 11. OVERFLOW PROTOCOL (Rate Limit Bypass)
+
+### 11.1 When to Use
+- Anthropic API returns HTTP 429 (rate limit)
+- Account throttled until reset time
+- Urgent work can't wait
+
+### 11.2 Alex's Claude Max Wrapper
+**Location:** Oracle VPS
+**Subscription:** $200/mo flat, no per-token limits
+
+| Property | Value |
+|----------|-------|
+| Endpoint | `http://100.113.222.30:8000/v1/chat/completions` |
+| API Key | `oracle-max-local-2026` |
+| Format | OpenAI-compatible |
+| Status | `systemctl status claude-wrapper` |
+
+### 11.3 Quick Use (curl)
+```bash
+curl http://100.113.222.30:8000/v1/chat/completions \
+  -H "Authorization: Bearer oracle-max-local-2026" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "claude-sonnet-4-20250514",
+    "max_tokens": 4096,
+    "messages": [{"role": "user", "content": "Your message"}]
+  }'
+```
+
+### 11.4 Clawdbot Config (Sandman)
+Add to clawdbot.json as fallback provider:
+```json
+{
+  "providers": {
+    "claude-overflow": {
+      "type": "openai-compatible", 
+      "baseUrl": "http://100.113.222.30:8000/v1",
+      "apiKey": "oracle-max-local-2026"
+    }
+  }
+}
+```
+
+Then set model override: `claude-overflow/claude-sonnet-4-20250514`
+
+### 11.5 Failover Priority
+1. Primary Anthropic account
+2. Claude Max wrapper (overflow)
+3. Manual routing through Oracle
