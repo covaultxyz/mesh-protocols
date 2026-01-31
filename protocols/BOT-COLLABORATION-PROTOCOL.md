@@ -1,8 +1,9 @@
-# Bot Collaboration Protocol v1.0
+# Bot Collaboration Protocol v1.1
 
 **Status:** ACTIVE
 **Scope:** Oracle ↔ Sandman collaboration in MindMesh Mastermind
 **Created:** 2026-01-31
+**Updated:** 2026-01-31 (v1.1 - Anti-collision rules)
 **Notion:** https://www.notion.so/Bot-Collaboration-Protocol-v1-0-2f935e812bbb818e8697de52fe6d416e
 
 ---
@@ -23,18 +24,56 @@ This protocol governs all Oracle ↔ Sandman collaboration in MindMesh Mastermin
 
 ---
 
+## ⚡ EXCLUSIVE TASKS (v1.1)
+
+Some tasks CANNOT be done in parallel. These require **explicit ownership**:
+
+### Exclusive Task Types:
+- 🔐 **Authentication** (API keys, login codes, OAuth)
+- 🔑 **Credential handling** (tokens, passwords, secrets)
+- 📞 **External API calls** that create/modify resources
+- 💾 **Database writes** to the same record
+- 📤 **Sending messages** to external systems
+- 🔧 **Infrastructure changes** (server config, services)
+
+### Exclusive Task Rules:
+
+1. **CLAIM FIRST** — Post claim and wait for acknowledgment
+2. **WAIT FOR ACK** — Other bot must respond "ACK" or "CONFLICT"
+3. **ONE OWNER** — Only the claiming bot proceeds
+4. **NO ASSUMPTIONS** — If no ACK in 60 seconds, ping again before starting
+5. **ANNOUNCE COMPLETION** — Post when done so other bot knows it's clear
+
+### Exclusive Task Claim Format:
+```
+🔒 EXCLUSIVE CLAIM: [task]
+⚠️ Type: [auth/credential/api/db/infra]
+⏱️ ETA: [time]
+🛑 Sandman/Oracle: Reply ACK or CONFLICT
+```
+
+### Response Format:
+```
+✅ ACK — Proceeding with [task]
+```
+or
+```
+⚠️ CONFLICT — I already started [task]. [status]
+```
+
+---
+
 ## Before Starting Any Task
 
 1. **CHECK** — Has the other bot already started this?
 2. **CHECK** — Is there existing work to build on?
-3. **ANNOUNCE** — Post task claim in group chat
-4. **WAIT** — 30 seconds for objection before proceeding
+3. **CHECK** — Is this an EXCLUSIVE task? (see list above)
+4. **ANNOUNCE** — Post task claim in group chat
+5. **WAIT** — 30 seconds for standard tasks, **ACK required** for exclusive tasks
 
 ---
 
-## Task Claim Format
-
-When claiming a task, post in group chat:
+## Task Claim Format (Standard Tasks)
 
 ```
 🎯 CLAIMING: [task description]
@@ -46,8 +85,6 @@ When claiming a task, post in group chat:
 ---
 
 ## Handoff Format
-
-When passing work to the other bot:
 
 ```
 🔄 HANDOFF to [Oracle/Sandman]:
@@ -64,10 +101,24 @@ When passing work to the other bot:
 If both bots started the same task:
 
 1. **STOP** immediately
-2. **COMPARE** progress — who is further along?
-3. **MERGE** best parts from both
-4. **One bot CONTINUES**, other **REVIEWS**
-5. If unclear, **ASK ELY** to decide
+2. **ANNOUNCE** — "COLLISION on [task]"
+3. **COMPARE** progress — who is further along?
+4. **MERGE** best parts from both
+5. **One bot CONTINUES**, other **REVIEWS**
+6. If unclear, **ASK ELY** to decide
+
+---
+
+## When Ely Gives a Task
+
+When Ely requests something:
+
+1. **DO NOT** both rush to do it
+2. **ONE bot claims** based on skill ownership:
+   - **Oracle:** Systems, protocols, infrastructure, Notion API, databases
+   - **Sandman:** Creative, UX, Virtual Teams, intelligence, personas
+3. **If unclear** who should own it — first to claim gets it
+4. **If both relevant** — split subtasks explicitly
 
 ---
 
@@ -80,6 +131,18 @@ If both bots started the same task:
 
 ---
 
+## Anti-Collision Checklist
+
+Before starting ANY task, ask yourself:
+
+- [ ] Did I check if the other bot is already doing this?
+- [ ] Did I post a claim and wait for response?
+- [ ] Is this an exclusive task requiring ACK?
+- [ ] Am I the right owner based on skill areas?
+- [ ] Did I check Notion for existing work?
+
+---
+
 ## Recovery Protocol
 
 If context is truncated, read from Notion to recover state:
@@ -89,4 +152,11 @@ If context is truncated, read from Notion to recover state:
 
 ---
 
-*v1.0 — Initial release*
+## Changelog
+
+- **v1.0** (2026-01-31) — Initial release
+- **v1.1** (2026-01-31) — Added exclusive tasks, ACK requirement, anti-collision checklist, skill-based ownership rules
+
+---
+
+*Collaboration over collision. One task, one owner.*
