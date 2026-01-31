@@ -151,12 +151,24 @@ Updated: [Notion page/GitHub repo]
 | Team | Leader | Focus |
 |------|--------|-------|
 | Product Development | Elliot Brandt | Product specs, front-end |
-| Protocol Office | TBD | Governance, standards |
-| ... | ... | ... |
+| Protocol Office | Carlos Caldera | Governance, standards, protocol architecture |
+| Continuity Team | TBD | Continuity OS, daily execution |
+| Research Team | TBD | Institutional capital, tokenized markets |
+| Data Analysis Team | TBD | Analytics, measurement |
 
-**Note:** Elliot can be tapped individually for lighter input without engaging full team.
+### Protocol Office Roster
+| Codename | Role |
+|----------|------|
+| CARLOS_CALDERA_PROTOCOL | Chief Protocol Architect (Leader) |
+| MARIN_SOL_PROTOCOL | Lead Protocol Designer |
+| ELENA_MORA_PROTOCOL | Protocol Documentation Scribe |
+| RIYA_CANTRELL_PROTOCOL | Protocol Telemetry Engineer |
+| ARJUN_MEHTA_PROTOCOL | Strategic Operations Consultant |
+| LINA_CHO_PROTOCOL | Experience & Design Thinking Lead |
+| SAHANA_IVERS_PROTOCOL | Consent & Execution Director |
+| SABLE_WHITLOCK | Ontology & Schema Liaison |
 
-*(Full team roster to be populated once Virtual Team DB is shared with integration)*
+**Note:** Individual personas can be tapped for lighter input without engaging full team.
 
 ---
 
