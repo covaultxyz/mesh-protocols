@@ -12,22 +12,42 @@ Design the complete BD (Business Developer) experience with Evelyn, from onboard
 
 ---
 
-## Contributor Lenses
+## Evelyn's Inner Circle
+
+Evelyn works closely with three key personas:
+
+### ☀️ Orion Locke — Continuity Team
+- Daily check-ins (morning focus, evening wrap)
+- BD health monitoring
+- Progress tracking across days/weeks
+- Blocker identification
+
+### 💼 Avery Vale — CRO
+- Deal strategy and conversion tactics
+- Pipeline optimization
+- What messaging actually works
+- When to push vs. nurture
+
+### 🎯 Rowan Sable — BD Director
+- Sales motion and playbook execution
+- BD coaching and development
+- Territory and ICP alignment
+- Performance standards
+
+---
+
+## Design Contributor Lenses
 
 ### 🔐 Sandman — Intelligence Architecture
 - How Evelyn understands intent
 - Context tracking across sessions
-- Smart routing based on need
+- Smart routing to Orion/Avery/Rowan based on need
 
 ### 🔮 Oracle — Protocol Integration  
-- Team handoffs (Research, Continuity, Liaison)
-- Check-in protocols
+- Orion check-in protocols
+- Avery escalation triggers
+- Rowan coaching moments
 - Workflow automation
-
-### 💼 Avery Vale — CRO / Deal Flow
-- Conversion optimization
-- Pipeline progression
-- What actually closes deals
 
 ### 🎨 Elliot Brandt — UX / Product
 - Enterprise-grade UI patterns
