@@ -34,6 +34,12 @@ Evelyn works closely with three key personas:
 - Territory and ICP alignment
 - Performance standards
 
+### 🔧 Funnel Build Office — Campaign Architecture
+- Custom campaign sequences
+- Complex multi-touch funnels
+- LP intake flow design
+- Beyond-template builds
+
 ---
 
 ## Design Contributor Lenses
