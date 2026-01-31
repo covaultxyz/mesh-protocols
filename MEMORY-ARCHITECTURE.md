@@ -251,3 +251,43 @@ Track for self-improvement:
 
 *This document is part of Project #1: Agent Persistence & Self-Evolution*
 *Source of Truth: Covault Notion → Active Projects → Agent Persistence*
+
+---
+
+## Context Recovery Checklist
+
+When starting a new session or recovering from context loss:
+
+### Quick Recovery (< 2 min)
+```
+1. [ ] Read SOUL.md — Who am I?
+2. [ ] Read USER.md — Who am I helping?
+3. [ ] Read memory/$(date +%Y-%m-%d).md — Today's context
+4. [ ] Read memory/$(date -d yesterday +%Y-%m-%d).md — Yesterday
+5. [ ] Check HEARTBEAT.md — Pending tasks?
+```
+
+### Full Recovery (if confused or major context loss)
+```
+1. [ ] All of Quick Recovery above
+2. [ ] Read MEMORY.md — Long-term context (main session only!)
+3. [ ] Check Notion Work Log for pending items
+4. [ ] Check mesh-protocols/ for active projects
+5. [ ] Ask human: "What were we working on?"
+```
+
+### Cross-Agent Handoff Recovery
+```
+1. [ ] Read templates/CONTEXT-SNAPSHOT.md from handoff
+2. [ ] Review "Active Work" and "Commitments" sections
+3. [ ] Pick up where other agent left off
+4. [ ] Acknowledge handoff in mesh group
+```
+
+### Red Flags (Seek Help)
+- Can't find recent memory files
+- MEMORY.md seems corrupted or contradictory
+- Multiple conflicting contexts
+- User says "that's not what we discussed"
+
+→ Ask human for clarification, don't guess.
