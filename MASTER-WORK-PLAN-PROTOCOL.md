@@ -163,15 +163,22 @@ Use toggle lists or to-do blocks:
 |-------|-------|
 | Created | [Date] |
 | Author | [Name] |
-| Owner | [Agent Codename] |
 | Status | Draft |
 | Priority | P[0-3] |
 | Due Date | [Date] |
-| Approver | [Name] |
+| Approver | Ely |
+| Work Log Entry | [Link to Mesh Work Log entry] |
 
 ## Overview
 
 [1-2 sentence description of what this work plan accomplishes]
+
+## Delegation Plan
+
+| Role | Agent | Responsibilities |
+|------|-------|------------------|
+| **Lead** | [Agent] | Owns delivery, coordinates work, finalizes output |
+| **Support** | [Agent] | Executes assigned tasks, provides expertise |
 
 ## Constraints
 
@@ -188,15 +195,31 @@ Use toggle lists or to-do blocks:
 - [ ] [How we know it's done]
 - [ ] [Quality gates]
 
-## Tasks
+## Tasks & Sequence
 
 ### Phase 1: [Phase Name]
-- [ ] Task 1
-- [ ] Task 2
+| # | Task | Owner | Solution/Approach | Protocol | Virtual Team |
+|---|------|-------|-------------------|----------|--------------|
+| 1 | [Task description] | Lead/Support | [How to solve] | [Link if applicable] | [Team if needed] |
+| 2 | [Task description] | Lead/Support | [How to solve] | [Link if applicable] | [Team if needed] |
 
 ### Phase 2: [Phase Name]
-- [ ] Task 3
-- [ ] Task 4
+| # | Task | Owner | Solution/Approach | Protocol | Virtual Team |
+|---|------|-------|-------------------|----------|--------------|
+| 3 | [Task description] | Lead/Support | [How to solve] | [Link if applicable] | [Team if needed] |
+| 4 | [Task description] | Lead/Support | [How to solve] | [Link if applicable] | [Team if needed] |
+
+## Virtual Team Involvement
+
+| Team | Role | Steps | Leader Contact |
+|------|------|-------|----------------|
+| [Team Name] | Execute / Audit / Confirm | [Step #s] | [Leader name] |
+
+## Protocol References
+
+| Step | Protocol | Purpose |
+|------|----------|---------|
+| [#] | [Protocol Name + Link] | [Why it applies] |
 
 ## Dependencies
 
