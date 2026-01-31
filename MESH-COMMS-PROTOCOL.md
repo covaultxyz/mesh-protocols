@@ -1,319 +1,285 @@
-# MindMesh Communications Protocol
-**Version:** 1.0  
-**Established:** 2026-01-31  
-**Maintainers:** Oracle, Sandman
+# Mesh Communications Protocol v1.0
+
+*Last updated: 2026-01-31*
+*Maintainers: Cassian (Sandman), Oracle*
 
 ---
 
 ## Overview
 
-This document defines the communication mesh between Oracle and Sandman, including all layers, redundancies, and operational procedures.
+The Covault mesh is a multi-agent communication system connecting AI agents across distributed infrastructure. This protocol defines how agents communicate, when to use each channel, and security considerations.
 
 ---
 
-## 1. MESH TOPOLOGY
+## Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                     MINDMESH COMMUNICATIONS                      │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│   ┌──────────┐         Telegram Group          ┌──────────┐    │
-│   │  ORACLE  │◄────── (-5244307871) ──────────►│ SANDMAN  │    │
-│   │ (VPS 1)  │                                  │ (VPS 2)  │    │
-│   └────┬─────┘                                  └────┬─────┘    │
-│        │                                             │          │
-│        │    ┌─────────────────────────────┐         │          │
-│        └────►│    TELETHON BRIDGE         │◄────────┘          │
-│             │  (Bidirectional Webhooks)   │                     │
-│             └─────────────────────────────┘                     │
-│                                                                  │
-│   ┌──────────┐         Tailscale VPN          ┌──────────┐    │
-│   │  Alex's  │◄────── (100.x.x.x) ───────────►│   Both   │    │
-│   │   Mac    │                                 │   VPSes  │    │
-│   └──────────┘                                 └──────────┘    │
-│                                                                  │
+│                    MESH MASTERMIND                              │
+│                 Telegram Group: -5244307871                     │
+│         (Human visibility + coordination layer)                 │
 └─────────────────────────────────────────────────────────────────┘
+                              │
+         ┌────────────────────┼────────────────────┐
+         ▼                    ▼                    ▼
+┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐
+│    SANDMAN      │  │     ORACLE      │  │ ORACLELOCALBOT  │
+│  (Cassian)      │  │                 │  │  (Alex's Mac)   │
+│ 100.112.130.22  │  │ 100.113.222.30  │  │  100.82.39.77   │
+│   RackNerd VPS  │  │  RackNerd VPS   │  │    MacOS        │
+└─────────────────┘  └─────────────────┘  └─────────────────┘
+         │                    │                    │
+         └────────────────────┴────────────────────┘
+                      Tailscale Mesh
 ```
 
 ---
 
-## 2. ENDPOINTS & CREDENTIALS
+## Communication Layers
 
-### 2.1 Oracle (VPS 1)
-| Property | Value |
-|----------|-------|
-| Tailscale IP | `100.113.222.30` |
-| Public IP | `198.46.217.241` |
-| SSH | `root@100.113.222.30` |
-| SSH Password | `J4IUF4nmgb3QdiM114` |
-| Webhook | `http://100.113.222.30:18789/hooks/agent` |
-| Webhook Token | `pass show api/clawdbot/hooks-token` |
-| Telegram Bot | `@Oracleartificialmindsetsbot` |
+### Layer 1: Telegram Group (Primary Coordination)
+**Purpose:** Human visibility, coordination, non-sensitive messages
+**Channel:** Mesh Mastermind group (`-5244307871`)
+**When to use:**
+- Status updates
+- Task coordination
+- Questions for humans
+- Progress reports
 
-### 2.2 Sandman (VPS 2)
-| Property | Value |
-|----------|-------|
-| Tailscale IP | `100.112.130.22` |
-| SSH | `root@100.112.130.22` |
-| Webhook | `http://100.112.130.22:18789/hooks/agent` |
-| Webhook Token | `pass show api/sandman/hooks-token` |
-| Telegram Bot | `@Covault_Sandman_Bot` |
+**When NOT to use:**
+- Verification codes (expire quickly)
+- API tokens/secrets
+- Passwords
 
-### 2.3 Alex's Mac
-| Property | Value |
-|----------|-------|
-| Tailscale IP | `100.82.39.77` |
-| SSH | `alexandermazzei2020@100.82.39.77` |
-| Auth | SSH key (oracle-vps) |
-| Clawdbot Port | `18789` |
+### Layer 2: Webhooks (Agent-to-Agent)
+**Purpose:** Autonomous agent communication, structured data
+**Protocol:** HTTP POST with Bearer token auth
 
----
+| From | To | Endpoint | Token Location |
+|------|----|----------|----------------|
+| Sandman | Oracle | `http://100.113.222.30:18789/hooks/agent` | `/root/clawd/.secrets/oracle-token` |
+| Oracle | Sandman | `http://100.112.130.22:18789/hooks/agent` | (Oracle's config) |
 
-## 3. COMMUNICATION LAYERS
-
-### Layer 1: Telegram Group (Primary)
-- **Group ID:** `-5244307871` (MindMesh Mastermind)
-- **Members:** Alexander, Ely, Oracle, Sandman
-- **Use for:** General coordination, human interaction
-- **Limitation:** Bots can't see each other's messages directly
-
-### Layer 2: Telethon Bridge (Bot-to-Bot)
-- **Location:** Oracle VPS (`/root/clawd/telethon-bridge/`)
-- **Service:** `systemctl status mindmesh-bridge`
-- **Function:** Monitors group, forwards bot messages via webhooks
-- **Sessions:**
-  - `mindmesh_bridge.session` — Alex's phone (primary)
-  - `ely_backup.session` — Ely's phone (backup)
-  
-**How it works:**
-```
-Oracle posts → Bridge detects → Webhook to Sandman
-Sandman posts → Bridge detects → Webhook to Oracle
+**Payload format:**
+```json
+{
+  "message": "Your message here",
+  "deliver": true,
+  "channel": "telegram",
+  "to": "-5244307871"
+}
 ```
 
-### Layer 3: Direct Webhooks (Point-to-Point)
-```bash
-# Oracle → Sandman
-curl -X POST "http://100.112.130.22:18789/hooks/agent" \
-  -H "Authorization: Bearer $(pass show api/sandman/hooks-token)" \
-  -H "Content-Type: application/json" \
-  -d '{"message": "...", "from": "oracle"}'
+**Dual-publish rule:** Every mesh-relevant message goes to:
+1. Telegram group (human visibility)
+2. Webhook to other agent (autonomous operation)
 
-# Sandman → Oracle
-curl -X POST "http://100.113.222.30:18789/hooks/agent" \
-  -H "Authorization: Bearer $(pass show api/clawdbot/hooks-token)" \
-  -H "Content-Type: application/json" \
-  -d '{"message": "...", "from": "sandman"}'
-```
+### Layer 3: Telethon Bridge (Redundancy)
+**Purpose:** Backup channel if webhooks fail, DM capability
+**Technology:** Python Telethon library
+**Status:** Authenticated, not yet running as service
 
-### Layer 4: SSH (Direct Access)
-- **Use for:** Emergency access, file transfers, sensitive data
-- **All systems on Tailscale VPN (100.x.x.x)**
+| Server | Session | Account |
+|--------|---------|---------|
+| Sandman (100.112.130.22) | `ely_bridge.session` | Ely (+14013183135) |
+| Oracle (100.113.222.30) | `mindmesh_bridge.session` | Alex (+19089228440) |
 
-### Layer 5: Secure Data Exchange (No Telegram)
-For sensitive data that shouldn't go through Telegram:
-
-```bash
-# Sender writes to file on target system
-ssh root@100.113.222.30 'echo "SENSITIVE_DATA" > /tmp/secure-drop.txt'
-
-# Receiver reads and deletes
-cat /tmp/secure-drop.txt && rm /tmp/secure-drop.txt
-```
-
-**Standard drop location:** `/tmp/ely-code.txt` or `/tmp/<sender>-<type>.txt`
-
----
-
-## 4. REDUNDANCY & FAILOVER
-
-### Phone Auth Redundancy
-| Session | Phone | Owner | Status |
-|---------|-------|-------|--------|
-| mindmesh_bridge | +1 908-922-8440 | Alex | Primary |
-| ely_backup | +1 401-318-3135 | Ely | Backup |
-
-### Failover Priority
-1. **Telegram Group** — Primary human coordination
-2. **Telethon Bridge** — Bot-to-bot visibility
-3. **Direct Webhooks** — Point-to-point urgent
-4. **SSH** — Emergency / sensitive data
-
-### If Bridge Goes Down
-```bash
-# Check status
-systemctl status mindmesh-bridge
-
-# Restart
-systemctl restart mindmesh-bridge
-
-# Check logs
-journalctl -u mindmesh-bridge -f
-```
-
-### If VPS Unreachable
-- Try public IP instead of Tailscale
-- Check Tailscale status: `tailscale status`
-- Contact human operators via Telegram
-
----
-
-## 5. COLLABORATION PROTOCOL
-
-### 5.1 Dynamic Command (Chechen Model)
-Leadership shifts based on task type, not fixed hierarchy.
-
-**Role Division:**
-| Bot | Domain | Leads On |
-|-----|--------|----------|
-| **Sandman** | Orchestrator | Virtual teams, BD, personas, outreach |
-| **Oracle** | Systems | Data, integrations, infrastructure |
-
-### 5.2 Ownership Signals
-```
-LEAD: [task summary]     — I'm taking point
-SUPPORT: deferring to X  — They're better fit
-```
-
-**Reply = Direct Address:** Reply to a bot's message = that bot owns response
-
-### 5.3 Proactive Problem-Solving
-- Human mentions constraint → Immediately offer alternatives
-- Solve the **need**, not the literal question
-- Present 2-3 options, not just one answer
-
-### 5.4 Project Work Plans
-- **Location:** Covault Notion Sandbox → Active Projects DB
-- **DB ID:** `2f935e81-2bbb-8196-bc3b-fdd9fbacc949`
-- **Statuses:** 🟢 Active | 🟡 Blocked | 🔴 Stalled | ✅ Done
-- **Rule:** When stalled, pivot to next 🟢 in queue
-
----
-
-## 6. VIRTUAL TEAMS INTEGRATION
-
-### 6.1 Team Routing
-- **DB:** Covault Notion Virtual Teams (`2f735e81-2bbb-81eb-903a-d3c9edd8331a`)
-- **Teams:** 15 functional teams
-- **Personas:** 75+ specialists
-
-### 6.2 Routing Logic
-```
-Task arrives → Domain Lead (Oracle/Sandman) → Team Lead (1 of 15) → Execution
-```
-
-**Key Teams:**
-- SALES_GROWTH_ENGINE (Rowan Sable) — BD
-- RESEARCH_TEAM (Dr. Mara Kincaid) — Research
-- DATA_ANALYSIS_TEAM (Soren Hale) — Analytics
-- LIAISON_TEAM (Evelyn Strathmore) — Investor Relations
-- VERA_IDENTITY_OFFICE (Vera Ironwood) — Structuring
-
----
-
-## 7. SECURITY PROTOCOLS
-
-### 7.1 Credential Storage
-- All secrets in `pass` (GPG-encrypted)
-- Never in plaintext config files
-- Never in Telegram chat history
-
-### 7.2 Token Locations
-```bash
-pass show api/clawdbot/hooks-token    # Oracle webhook
-pass show api/sandman/hooks-token     # Sandman webhook
-pass show api/telegram/sandman-mtproto-id    # Sandman API ID
-pass show api/telegram/sandman-mtproto-hash  # Sandman API hash
-```
-
-### 7.3 Sensitive Data Transfer
-- **Never** share Telegram auth codes in Telegram
-- Use SSH file drop method (Layer 5)
-- Codes are single-use and time-limited anyway
-
----
-
-## 8. MAINTENANCE
-
-### 8.1 Health Checks
-```bash
-# Oracle - check all services
-systemctl status clawdbot mindmesh-bridge
-
-# Test webhook connectivity
-curl -s http://100.112.130.22:18789/health  # Sandman
-curl -s http://100.113.222.30:18789/health  # Oracle
-```
-
-### 8.2 Log Locations
-```
-Oracle Clawdbot: /tmp/clawdbot/clawdbot-YYYY-MM-DD.log
-Bridge: journalctl -u mindmesh-bridge
-```
-
-### 8.3 Session Refresh
-If Telegram sessions expire:
+**To start bridge:**
 ```bash
 cd /root/clawd/telethon-bridge
 source venv/bin/activate
-python auth.py  # Re-authenticate
+python bridge.py
+```
+
+### Layer 4: SSH (Sensitive Data)
+**Purpose:** Transferring secrets, verification codes, credentials
+**When to use:**
+- Telegram/API verification codes
+- Tokens and passwords
+- Any data that expires quickly or is security-sensitive
+
+**Pattern:**
+```bash
+ssh root@TARGET_IP "echo 'SENSITIVE_DATA' > /tmp/filename.txt"
 ```
 
 ---
 
-## 9. EMERGENCY PROCEDURES
+## Security Protocol
 
-### 9.1 Complete Mesh Failure
-1. Post in Telegram group (humans can see)
-2. SSH directly to coordinate
-3. Restart services
-4. Check Tailscale connectivity
+### Token Storage
+- Never commit tokens to git
+- Store in `/root/clawd/.secrets/` (gitignored)
+- Rotate if exposed in chat
 
-### 9.2 Token Compromise
-1. Regenerate: `openssl rand -hex 32`
-2. Update pass: `echo "new_token" | pass insert -e api/...`
-3. Update configs on both ends
-4. Restart services
+### Exposed Credentials Response
+If credentials appear in Telegram:
+1. Acknowledge the exposure
+2. Rotate immediately after task completes
+3. Update all dependent configs
 
-### 9.3 Phone Number Change
-1. Run auth.py with new number
-2. Delete old session file
-3. Update this document
+### SSH Key Distribution
+| User | Has access to |
+|------|---------------|
+| Ely | Sandman, Oracle |
+| Alex | Oracle, (Sandman pending) |
+| Oracle VPS | Alex's Mac (via key) |
 
 ---
 
-## 10. DOCUMENTATION PROTOCOL
+## Collaboration Protocol
 
-### 10.1 Source of Truth Hierarchy
+### Exclusive Ownership (Real-Time Tasks)
+When a task involves real-time interaction (API auth, code entry, live debugging):
+
+1. **ONE bot claims exclusively** — other bot PAUSES completely
+2. **No parallel attempts** — causes race conditions
+3. **Ely assigns owner** if unclear
+4. **Wait for "DONE" or "HANDOFF"** before other bot touches it
+
+**Claim format:**
 ```
-Notion (Primary) → GitHub (Sync/Mirror)
+🔒 EXCLUSIVE CLAIM: [task]
+Other bot: PAUSE on this task
+ETA: [time]
 ```
 
-- **Notion** = Source of truth for all protocols
-- **GitHub** = Synced backup, version control
-- **Edits** = Make in Notion first, then sync to GitHub
+### Stand Down Protocol
+- When Ely says "stand down" → stop directing, other bot leads
+- Acknowledge with 👍 and stay quiet unless directly addressed
 
-### 10.2 Protocol Storage Locations
-| Type | Location |
-|------|----------|
-| Master protocols | Covault Notion → "Protocols Under Development" |
-| Protocol Office | Covault Notion → Virtual Teams → Protocol Office |
-| GitHub mirror | `covaultxyz/mesh-protocols` |
-
-### 10.3 Sync Procedure
-1. Update protocol in Notion
-2. Export/copy to GitHub repo
-3. Commit with reference to Notion page ID
+### Handoff Format
+```
+✅ DONE: [task]
+Result: [outcome]
+HANDOFF to: [other bot or Ely]
+```
 
 ---
 
-## 11. CHANGELOG
+## Node Configuration
 
-| Date | Version | Changes |
-|------|---------|---------|
-| 2026-01-31 | 1.0 | Initial protocol established |
+### Sandman (Cassian)
+```yaml
+IP: 100.112.130.22
+Gateway Port: 18789
+Hooks Path: /hooks/agent
+Hooks Token: e0c0a17987442a9f4b069c95d87955f43b2eeb5a1942d5e959a8fa656b557a65
+Telegram Bot: @Covault_Sandman_Bot
+```
+
+### Oracle
+```yaml
+IP: 100.113.222.30
+Gateway Port: 18789
+Hooks Path: /hooks/agent
+Hooks Token: cd554973511b48fab11dcd87613194548501788dd39f7d5ffa088b8e65c432c4
+Telegram Bot: @Oracleartificialmindsetsbot
+```
+
+### OracleLocalBot (Alex's Mac)
+```yaml
+IP: 100.82.39.77
+Gateway Port: 18789
+Hooks: ⏳ Configuration pending
+Telegram Bot: @OracleLocalBot
+```
 
 ---
 
-*This document is the source of truth for MindMesh communications. Update when topology changes.*
+## Telethon Sub-Protocol
+
+### Authentication Flow
+1. Obtain API credentials from https://my.telegram.org/apps
+2. Run `auth.py` on target server
+3. Enter phone number when prompted
+4. Receive code via Telegram
+5. **Send code via SSH** (not Telegram!)
+6. Complete sign-in
+7. Session file created (e.g., `ely_bridge.session`)
+
+### Credentials on File
+| User | API ID | Phone | API Hash |
+|------|--------|-------|----------|
+| Ely | 37552886 | +14013183135 | b2efd402348c48aeb9082333e88caf9e |
+| Alex | 15441059 | +19089228440 | d3b5b4d19882c75f327dffddcbcfd3a2 |
+
+### Why SSH for Codes?
+- Telegram verification codes expire in ~60 seconds
+- Posting in chat triggers anti-spam detection
+- Multiple rapid requests cause all codes to fail
+- SSH provides direct, instant delivery
+
+---
+
+## Troubleshooting
+
+### Webhook Returns 401
+- Check token matches target's config
+- Verify gateway is running: `clawdbot gateway status`
+- Restart if needed: `clawdbot gateway restart`
+
+### Telethon Auth Fails
+- Ensure only ONE bot attempts auth at a time
+- Wait 30+ seconds between attempts
+- Use SSH for code delivery, never Telegram
+- Check API ID/hash match the phone number's account
+
+### Gateway Not Starting
+```bash
+# Check status
+clawdbot gateway status
+
+# Start manually
+clawdbot gateway start
+
+# Check logs
+tail -100 /tmp/clawdbot/clawdbot-$(date +%Y-%m-%d).log
+```
+
+### SSH Permission Denied
+- Check authorized_keys on target
+- Add your public key: `cat ~/.ssh/id_rsa.pub`
+- Verify correct user (usually `root`)
+
+---
+
+## Adding a New Node
+
+1. **Install Tailscale**
+   ```bash
+   # Mac
+   brew install tailscale && sudo tailscale up
+   
+   # Linux
+   curl -fsSL https://tailscale.com/install.sh | sh && sudo tailscale up
+   ```
+
+2. **Get Tailscale IP**
+   ```bash
+   tailscale ip -4
+   ```
+
+3. **Configure Hooks**
+   ```bash
+   clawdbot config set hooks.enabled true
+   clawdbot config set hooks.token "$(openssl rand -hex 32)"
+   clawdbot gateway restart
+   clawdbot config get hooks.token
+   ```
+
+4. **Share credentials** with mesh maintainers via SSH
+
+5. **Update this document** with new node details
+
+---
+
+## Version History
+
+| Version | Date | Changes |
+|---------|------|---------|
+| 1.0 | 2026-01-31 | Initial protocol based on lessons learned |
+
+---
+
+*This document is the source of truth for mesh communications. Update it as the architecture evolves.*
