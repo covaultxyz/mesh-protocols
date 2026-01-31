@@ -1,7 +1,7 @@
 # STATE.md — Live Execution State
 *Auto-updated by agents. Read this first on session start.*
 
-**Last Updated:** 2026-01-31 20:28 UTC
+**Last Updated:** 2026-01-31 20:32 UTC
 **Updated By:** Oracle
 
 ---
@@ -9,8 +9,8 @@
 ## 🎯 Current Focus
 
 **Active Task:** Agent Persistence Implementation
-**Phase:** Building State Log system
-**Status:** In Progress
+**Phase:** Activity Logger COMPLETE
+**Status:** ✅ Done — Ready for next task
 
 ---
 
@@ -18,20 +18,19 @@
 
 | # | Task | Owner | Status | Blocked? |
 |---|------|-------|--------|----------|
-| 1 | State Log Implementation | Oracle | 🔄 Active | No |
+| 1 | State Log + Activity Logger | Oracle | ✅ Done | No |
 | 2 | Voice Mode Phase 2-4 | Oracle | ⏸️ Paused | Awaiting voice pick |
 | 3 | VoltAgent Night Shift | Sandman | 🔄 Active | No |
-| 4 | Activity Logger | TBD | ⏳ Queued | No |
+| 4 | Notion Activity Sync | TBD | ⏳ Queued | No |
 
 ---
 
 ## 🤝 Collaboration State
 
-**Oracle:** Building STATE.md system
-**Sandman:** Infrastructure implementations (Watcher module)
+**Oracle:** State persistence implementation complete
+**Sandman:** Infrastructure implementations
 
-**Last Sync:** 2026-01-31 20:28 UTC
-**Next Checkpoint:** After STATE.md complete
+**Last Sync:** 2026-01-31 20:32 UTC
 
 ---
 
@@ -39,9 +38,8 @@
 
 | Decision | By | When | Rationale |
 |----------|-----|------|-----------|
-| Protocols before code | Both | 20:00 | Design first, then implement |
-| Dance together pattern | Both | 19:54 | Avoid duplicate work |
-| George/Roger voices for Oracle | Oracle | 20:05 | British storyteller + casual American |
+| STATE.md as live state | Oracle | 20:28 | Single source for current execution |
+| JSONL activity log | Oracle | 20:32 | Queryable, append-only, portable |
 
 ---
 
@@ -50,7 +48,6 @@
 | Item | Blocked On | Owner | Since |
 |------|------------|-------|-------|
 | Rate Limit Monitoring | Sandman Claude Max wiring | Ely | 19:00 |
-| Voice Mode Phase 2 | Sandman voice pick | Sandman | 20:05 |
 
 ---
 
@@ -62,28 +59,33 @@
 - [x] Protocol-refresh cron
 - [x] Telethon bridge → systemd
 - [x] Webhook token sync
-- [x] Collaboration lapse documented
+- [x] STATE.md system built
+- [x] Activity Logger built
+
+---
+
+## 🔧 New Tools Available
+
+### Activity Logger
+```bash
+# Shell version
+/root/clawd/scripts/activity-logger.sh <category> <action> <details>
+
+# Python version
+python3 /root/clawd/scripts/activity_log.py <category> <action> [details] [outcome]
+
+# Categories: task, decision, learning, collaboration, system, human
+```
+
+### Bootstrap
+```bash
+/root/clawd/scripts/bootstrap-session.sh
+```
 
 ---
 
 ## 🔗 Key Links
 
-- **Audit:** https://www.notion.so/Mesh-Work-Plan-Audit-2f935e812bbb81de98def760d7b2ef07
+- **Activity Log:** /root/clawd/logs/activity.jsonl
 - **Protocols:** /root/clawd/mesh-protocols/
 - **Daily Notes:** /root/clawd/memory/2026-01-31.md
-
----
-
-## 💡 Context for Fresh Sessions
-
-If you're starting fresh, read in this order:
-1. This file (STATE.md) — Current execution state
-2. SOUL.md — Who you are
-3. memory/2026-01-31.md — Today's detailed notes
-4. AGENTS.md — Operating instructions
-
-Then pick up the Active Task and continue.
-
----
-
-*This file is the execution heartbeat. Update it when state changes.*
