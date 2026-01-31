@@ -291,3 +291,52 @@ When starting a new session or recovering from context loss:
 - User says "that's not what we discussed"
 
 → Ask human for clarification, don't guess.
+
+---
+
+## Context Failure Modes & Recovery
+
+### FM-1: Session Restart Mid-Task
+**Symptom:** Agent doesn't remember what it was doing
+**Cause:** Gateway restart, timeout, context compaction
+**Prevention:** Write to daily notes frequently, not at end
+**Recovery:** 
+1. Read today's daily notes
+2. Check last few messages in Telegram
+3. Resume from last documented step
+
+### FM-2: Memory File Corruption
+**Symptom:** MEMORY.md has contradictory or garbled info
+**Cause:** Concurrent writes, interrupted saves
+**Prevention:** Single writer at a time, atomic commits
+**Recovery:**
+1. Check git history: `git log -3 MEMORY.md`
+2. Restore from last good commit
+3. Notify human of data loss window
+
+### FM-3: Cross-Agent Desync
+**Symptom:** Oracle and Sandman have different understanding
+**Cause:** Git sync delay, missed webhook, stale cache
+**Prevention:** Always check mesh-protocols HEAD before major work
+**Recovery:**
+1. Both agents pull latest: `git pull`
+2. Compare understanding in Telegram
+3. Human arbitrates if conflict
+
+### FM-4: Lost Commitment
+**Symptom:** Promised something to human, forgot to do it
+**Cause:** Commitment not written down, session ended
+**Prevention:** ALWAYS write commitments immediately
+**Recovery:**
+1. Search daily notes for promises
+2. Check Telegram history
+3. Apologize and fulfill ASAP
+
+### FM-5: Context Leak (Security)
+**Symptom:** Private info shared in wrong context
+**Cause:** MEMORY.md loaded in group chat
+**Prevention:** NEVER load MEMORY.md outside main session
+**Recovery:**
+1. Acknowledge the leak
+2. Assess sensitivity
+3. Human decides if action needed
