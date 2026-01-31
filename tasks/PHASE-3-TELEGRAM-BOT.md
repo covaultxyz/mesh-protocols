@@ -1,105 +1,186 @@
-# Phase 3: Telegram Bot Admin Interface
+# Phase 3: Telegram Bot — Full Specification
 
-**Owner:** Cassian Sandman  
-**Status:** Draft  
-**Dependencies:** Phase 2 (Web Surface) for API endpoints  
-**Priority:** High  
-**Estimated Effort:** 2-3 sessions
+**Owner:** Cassian (CASSIAN_SANDMAN)  
+**Status:** SPEC COMPLETE  
+**Created:** 2026-01-31
 
 ---
 
-## Objective
+## Overview
 
-Build Telegram bot commands for mesh administration that integrate with Virtual Teams personas. Enable authorized users to manage permissions, view mesh status, and execute admin actions directly from Telegram.
-
----
-
-## Tasks
-
-### 3.1 Core Bot Command Framework
-- [ ] Design command routing architecture
-- [ ] Implement `/mesh` command namespace
-- [ ] Build permission check middleware (validates against Phase 1 permission layer)
-- [ ] Create response formatters (inline buttons, structured messages)
-
-### 3.2 Status & Monitoring Commands
-- [ ] `/mesh status` — Show mesh health, connected agents, last sync
-- [ ] `/mesh agents` — List active agents with status indicators
-- [ ] `/mesh ping <agent>` — Round-trip latency check to specific agent
-- [ ] `/mesh logs [agent] [limit]` — Recent mesh activity logs
-
-### 3.3 Permission Management Commands
-- [ ] `/mesh perms list` — Show current permission matrix
-- [ ] `/mesh perms grant <agent> <capability>` — Grant capability
-- [ ] `/mesh perms revoke <agent> <capability>` — Revoke capability
-- [ ] `/mesh perms audit [agent]` — Permission change history
-
-### 3.4 Agent Management Commands
-- [ ] `/mesh agent <name> info` — Detailed agent profile
-- [ ] `/mesh agent <name> restart` — Trigger agent restart
-- [ ] `/mesh agent <name> pause` — Temporarily disable agent
-- [ ] `/mesh agent <name> resume` — Resume paused agent
-
-### 3.5 Virtual Teams Integration
-- [ ] Map bot commands to Virtual Teams persona permissions
-- [ ] Implement role-based command access (Exec vs. Operator vs. Viewer)
-- [ ] Log all admin actions to Virtual Teams audit trail
-- [ ] Support multi-org isolation (Covault vs. future orgs)
+Build a Telegram-based mesh administration interface that integrates with the Virtual Teams persona model. Commands follow a `/mesh` namespace with subcommand routing.
 
 ---
 
-## Technical Design
+## Architecture
 
-### Command Structure
 ```
-/mesh <domain> <action> [args...]
-
-Domains:
-- status    : Health and monitoring
-- agents    : Agent management  
-- perms     : Permission management
-- config    : Configuration (Phase 4)
-- broadcast : Multi-agent messaging (Phase 4)
+┌─────────────────┐     ┌──────────────────┐     ┌─────────────────┐
+│  Telegram API   │────▶│  Command Router  │────▶│  Agent Mesh     │
+│  (Bot Gateway)  │     │  + Auth Layer    │     │  (Tailscale)    │
+└─────────────────┘     └──────────────────┘     └─────────────────┘
+                               │
+                               ▼
+                        ┌──────────────────┐
+                        │  Virtual Teams   │
+                        │  Notion DB       │
+                        └──────────────────┘
 ```
 
-### Permission Mapping
-| Virtual Teams Role | Allowed Commands |
-|--------------------|------------------|
-| Partner/Exec       | All commands     |
-| Operator           | status, agents (read), perms (read) |
-| Viewer             | status only      |
+---
 
-### Response Format
-- Use inline buttons for confirmation flows (destructive actions)
-- Structured text with emoji indicators for status
-- Link to web console for detailed views (Phase 2)
+## Command Reference
+
+### Core Commands
+
+| Command | Description | Role Required |
+|---------|-------------|---------------|
+| `/mesh help` | Show available commands | Viewer |
+| `/mesh status` | Mesh health summary | Viewer |
+| `/mesh agents` | List all agents | Viewer |
+
+### Status & Monitoring
+
+| Command | Description | Role Required |
+|---------|-------------|---------------|
+| `/mesh ping <agent>` | Direct health check | Viewer |
+| `/mesh logs <agent> [n]` | Last n log lines (default 20) | Operator |
+| `/mesh metrics` | Telemetry summary | Viewer |
+
+### Permission Management
+
+| Command | Description | Role Required |
+|---------|-------------|---------------|
+| `/mesh perms list` | Show all permissions | Operator |
+| `/mesh perms grant <user> <role>` | Add permission | Exec |
+| `/mesh perms revoke <user> <role>` | Remove permission | Exec |
+| `/mesh perms audit` | Permission change log | Operator |
+
+### Agent Management
+
+| Command | Description | Role Required |
+|---------|-------------|---------------|
+| `/mesh agent <name> info` | Agent details | Viewer |
+| `/mesh agent <name> restart` | Graceful restart | Operator |
+| `/mesh agent <name> pause` | Suspend processing | Operator |
+| `/mesh agent <name> resume` | Resume from pause | Operator |
+| `/mesh agent <name> config` | View/set config | Operator |
 
 ---
 
-## Integration Points
+## Role Hierarchy
 
-- **Phase 1 (Permission Layer):** All commands validate against permission API
-- **Phase 2 (Web Surface):** Commands link to detailed web views
-- **Clawdbot Gateway:** Commands route through existing Telegram channel plugin
+```
+Exec (Ely + designated)
+  └── Operator (Oracle, Cassian, trusted personas)
+        └── Viewer (Any authenticated Virtual Team member)
+```
 
----
-
-## Success Criteria
-
-1. Authorized users can check mesh status from Telegram
-2. Permission changes via Telegram logged with full audit trail
-3. Response time < 2s for all read commands
-4. Destructive actions require inline button confirmation
-5. Unauthorized commands return clear denial message
+**Exec:** Full control, permission grants, destructive operations  
+**Operator:** Management commands, logs, restarts  
+**Viewer:** Read-only status and monitoring
 
 ---
 
-## Open Questions
+## Permission Mapping
 
-- [ ] Should we support slash commands or inline @mention commands?
-- [ ] Rate limiting strategy for admin commands?
-- [ ] Notification preferences (DM vs. channel)?
+| Telegram User | Virtual Teams Persona | Role |
+|---------------|----------------------|------|
+| @GlassyNakamoto | Ely Beckman | Exec |
+| @artificialmindsets | Alex (Oracle admin) | Exec |
+| (Oracle bot) | Oracle | Operator |
+| (Cassian bot) | Cassian Sandman | Operator |
+
+Additional mappings configured in `mesh-bot/config/permissions.json`.
 
 ---
 
-*Last Updated: 2026-01-31*
+## Response Formatting
+
+### Status Response (Example)
+```
+🟢 Mesh Status — All Systems Operational
+
+Agents: 2/2 online
+├─ 🟢 Oracle (100.113.222.30) — 142ms
+└─ 🟢 Cassian (100.112.130.22) — 89ms
+
+Last sweep: 2 min ago
+Uptime: 99.8% (7d)
+```
+
+### Inline Buttons (Example)
+```
+[🔄 Restart Oracle] [📋 View Logs]
+[⚙️ Config] [📊 Metrics]
+```
+
+---
+
+## Error Handling
+
+| Error | Response |
+|-------|----------|
+| Unknown command | "Unknown command. Try `/mesh help`" |
+| Permission denied | "❌ Requires {role} role. Current: {user_role}" |
+| Agent unreachable | "⚠️ {agent} unreachable. Last seen: {timestamp}" |
+| Invalid args | "Usage: `/mesh {command} {expected_args}`" |
+
+---
+
+## Audit Trail
+
+All commands logged to Virtual Teams activity:
+- Timestamp
+- Telegram user
+- Command issued
+- Target agent (if any)
+- Result (success/failure)
+- Error message (if failure)
+
+---
+
+## Dependencies
+
+- Phase 1: Permission Layer (auth middleware)
+- Phase 2: API Layer (agent endpoints)
+- Clawdbot: Telegram channel integration
+- Tailscale: Mesh connectivity
+
+---
+
+## Implementation Notes
+
+1. **Bot token:** Use existing Clawdbot Telegram integration, not separate bot
+2. **Command prefix:** `/mesh` avoids collision with standard Clawdbot commands
+3. **Async feedback:** Long operations (restart) send initial ACK, then status update
+4. **Rate limiting:** 10 commands/minute per user to prevent spam
+
+---
+
+## Files
+
+```
+mesh-bot/
+├── src/
+│   ├── commands/
+│   │   ├── index.ts          # Command router
+│   │   ├── status.ts         # /mesh status, agents, ping
+│   │   ├── perms.ts          # /mesh perms *
+│   │   ├── agent.ts          # /mesh agent *
+│   │   └── help.ts           # /mesh help
+│   ├── middleware/
+│   │   ├── auth.ts           # Telegram → persona mapping
+│   │   └── rateLimit.ts      # Per-user rate limiting
+│   └── formatters/
+│       ├── status.ts         # Status message templates
+│       └── buttons.ts        # Inline button builders
+├── config/
+│   └── permissions.json      # User → role mapping
+└── tests/
+    └── commands.test.ts      # Command handler tests
+```
+
+---
+
+*Cassian Sandman — Chief Intelligence Officer*

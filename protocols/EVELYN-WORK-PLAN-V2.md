@@ -2,7 +2,7 @@
 
 **Created:** 2026-01-31 13:55 UTC  
 **Authors:** Oracle + Cassian (Sandman)  
-**Status:** DRAFT — Awaiting Cassian's Phase 3-4 tasks
+**Status:** READY FOR REVIEW — Phase 3-4 tasks filled by Cassian
 
 ---
 
@@ -101,24 +101,47 @@
 📄 **Full Spec:** [`tasks/PHASE-3-TELEGRAM-BOT.md`](../tasks/PHASE-3-TELEGRAM-BOT.md)
 
 ### 3.1 Core Bot Command Framework
-- [ ] Design command routing architecture
-- [ ] Implement `/mesh` command namespace
-- [ ] Build permission check middleware
+- [ ] Design command routing architecture (prefix-based dispatch)
+- [ ] Implement `/mesh` command namespace with subcommand parser
+- [ ] Build permission check middleware (Telegram user → persona mapping)
 - [ ] Create response formatters (inline buttons, structured messages)
+- [ ] Add help system with contextual subcommand docs
+- [ ] Implement rate limiting per user/command type
 
 ### 3.2 Status & Monitoring Commands
-- [ ] `/mesh status`, `/mesh agents`, `/mesh ping`, `/mesh logs`
+- [ ] `/mesh status` — Overall mesh health (agents up/down, last heartbeat)
+- [ ] `/mesh agents` — List all agents with status indicators
+- [ ] `/mesh ping <agent>` — Direct health check with latency
+- [ ] `/mesh logs <agent> [lines]` — Tail recent logs
+- [ ] `/mesh metrics` — Key telemetry (uptime, request counts, error rates)
 
 ### 3.3 Permission Management Commands
-- [ ] `/mesh perms list/grant/revoke/audit`
+- [ ] `/mesh perms list [agent|user]` — Show current permission grants
+- [ ] `/mesh perms grant <user> <role> [scope]` — Add permission
+- [ ] `/mesh perms revoke <user> <role>` — Remove permission
+- [ ] `/mesh perms audit [user]` — Show permission change history
+- [ ] Implement confirmation flow for destructive operations
 
 ### 3.4 Agent Management Commands
-- [ ] `/mesh agent <name> info/restart/pause/resume`
+- [ ] `/mesh agent <name> info` — Config, version, last activity
+- [ ] `/mesh agent <name> restart` — Trigger graceful restart
+- [ ] `/mesh agent <name> pause` — Suspend processing (queues held)
+- [ ] `/mesh agent <name> resume` — Resume from pause
+- [ ] `/mesh agent <name> config [key] [value]` — View/set runtime config
+- [ ] Implement async operation feedback (restart progress, etc.)
 
 ### 3.5 Virtual Teams Integration
-- [ ] Map commands to persona permissions
-- [ ] Role-based access (Exec/Operator/Viewer)
-- [ ] Audit trail to Virtual Teams
+- [ ] Map Telegram user IDs to Virtual Teams persona identifiers
+- [ ] Implement role-based access (Exec/Operator/Viewer tiers)
+- [ ] Audit trail writes to Virtual Teams activity log
+- [ ] Surface persona context in command responses
+- [ ] Sync permission changes bidirectionally with Notion
+
+**Deliverables:**
+- `mesh-bot/src/commands/` — Command handlers
+- `mesh-bot/src/middleware/` — Auth + rate limiting
+- `mesh-bot/src/formatters/` — Response templates
+- `MESH-BOT-COMMANDS.md` — Command reference
 
 ---
 
@@ -129,26 +152,55 @@
 📄 **Full Spec:** [`tasks/PHASE-4-ADVANCED-FEATURES.md`](../tasks/PHASE-4-ADVANCED-FEATURES.md)
 
 ### 4.1 Multi-Agent Broadcast
-- [ ] `/mesh broadcast` with ACK tracking
-- [ ] Group targeting, templated messages
+- [ ] `/mesh broadcast <message>` — Send to all agents
+- [ ] `/mesh broadcast --group <group> <message>` — Target agent groups
+- [ ] Implement ACK tracking with timeout + retry
+- [ ] Create message templates for common broadcasts
+- [ ] Build delivery report summarizer (delivered/failed/pending)
+- [ ] Add scheduled broadcast capability
 
 ### 4.2 Automated Health Monitoring
-- [ ] Scheduled health sweeps
-- [ ] Alert routing, degradation detection
-- [ ] Auto-recovery triggers
+- [ ] Design health sweep scheduler (cron-based)
+- [ ] Implement degradation detection (latency thresholds, error spikes)
+- [ ] Build alert routing (Telegram DM, channel, escalation chains)
+- [ ] Create auto-recovery triggers (restart on failure pattern)
+- [ ] Add silence windows for maintenance
+- [ ] Health history dashboard with trend graphs
 
 ### 4.3 Configuration Management
-- [ ] `/mesh config view/set/diff/apply/rollback`
-- [ ] Version history with diff tracking
+- [ ] `/mesh config view [agent]` — Show current config
+- [ ] `/mesh config set <agent> <key> <value>` — Update single value
+- [ ] `/mesh config diff <agent>` — Show uncommitted changes
+- [ ] `/mesh config apply <agent>` — Push pending changes
+- [ ] `/mesh config rollback <agent> [version]` — Revert to prior
+- [ ] Implement version history with git-style diffs
+- [ ] Add config validation before apply
 
 ### 4.4 Workflow Automation
-- [ ] Workflow DSL (sequence, parallel, conditional)
-- [ ] Pre-built workflows: daily health check, restart sequence
+- [ ] Design workflow DSL (YAML-based, simple state machine)
+- [ ] Implement sequence steps (do A, then B, then C)
+- [ ] Implement parallel steps (fan-out, wait-all/wait-any)
+- [ ] Implement conditional steps (if/else on agent state)
+- [ ] Build pre-built workflow: daily health check
+- [ ] Build pre-built workflow: graceful restart sequence
+- [ ] Build pre-built workflow: escalation chain
+- [ ] `/mesh workflow run <name>` — Execute workflow
+- [ ] `/mesh workflow status <id>` — Check running workflow
 
 ### 4.5 Evelyn-Specific Extensions
-- [ ] Meeting prep intelligence
-- [ ] Objection handling library
-- [ ] Deal intelligence dashboards
+- [ ] Meeting prep intelligence (pull deal context, talking points)
+- [ ] Objection handling library (searchable, contextual)
+- [ ] Deal intelligence dashboard (pipeline health, stuck deals)
+- [ ] BD performance metrics (activity, conversion, velocity)
+- [ ] Competitor intel quick lookup
+- [ ] Integration with Phase 2 web surface for rich displays
+
+**Deliverables:**
+- `mesh-bot/src/orchestration/` — Broadcast + workflow engine
+- `mesh-bot/src/monitoring/` — Health sweep + alerting
+- `mesh-bot/src/config/` — Config management layer
+- `mesh-bot/workflows/` — Pre-built workflow definitions
+- `EVELYN-INTELLIGENCE-SPEC.md` — BD-specific feature docs
 
 ---
 
@@ -200,8 +252,9 @@ Phase 3-4 depend on Phase 1-2 infrastructure. Cassian can spec while I build.
 
 | Action | Owner | Due |
 |--------|-------|-----|
-| Fill Phase 3-4 tasks | Cassian | Today |
+| ~~Fill Phase 3-4 tasks~~ | ~~Cassian~~ | ✅ Done |
 | Review + merge work plan | Both | Today |
+| Create Phase 3-4 spec files | Cassian | Today |
 | Begin Phase 1.1 | Oracle | After merge |
 
 ---

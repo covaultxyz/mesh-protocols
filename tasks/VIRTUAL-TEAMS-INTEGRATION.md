@@ -1,136 +1,165 @@
-# Virtual Teams Integration Spec
+# Virtual Teams Integration Specification
 
-**Owner:** Cassian Sandman  
-**Status:** Draft  
-**Scope:** Cross-cutting concern across all phases  
-**Priority:** High
-
----
-
-## Objective
-
-Ensure the Mesh Admin Console integrates seamlessly with Covault's Virtual Teams infrastructure. Personas are not just metadata — they define capabilities, permissions, and trust boundaries.
+**Authors:** Oracle + Cassian  
+**Status:** SPEC DRAFT  
+**Created:** 2026-01-31
 
 ---
 
-## Core Principles
+## Overview
 
-### 1. Persona-Aware Permissions
-Every mesh operation maps to a Virtual Teams persona capability:
-- Partner/Exec → Full admin
-- Operator → Read + limited write
-- Viewer → Read only
-- External → Denied by default
-
-### 2. Audit Trail Requirements
-All admin actions logged to Virtual Teams audit surface:
-- WHO (persona identifier)
-- WHAT (action taken)
-- WHEN (timestamp, timezone)
-- WHERE (source: Telegram, Web, API)
-- WHY (optional: user-provided reason)
-
-### 3. Multi-Org Isolation
-Design for future state: multiple orgs, each with their own:
-- Persona registry
-- Permission matrix
-- Audit logs
-- Mesh topology
+This spec defines how Evelyn and the mesh bot integrate with the Virtual Teams persona model in Notion.
 
 ---
 
-## Data Model Extensions
+## Persona → Permission Mapping
 
-### Persona → Mesh Agent Mapping
-```yaml
-persona:
-  id: CASSIAN_SANDMAN
-  type: PERSONA
-  team: EXECUTIVE_TEAM
-  
-meshBinding:
-  agentId: cassian-sandman
-  webhookUrl: http://100.112.130.22:18789/hooks/agent
-  capabilities:
-    - mesh.admin
-    - mesh.broadcast
-    - mesh.config.write
-  trustLevel: full
+### Notion Virtual Teams DB Fields
+
+| Field | Use |
+|-------|-----|
+| `Codename` | Unique identifier for permission grants |
+| `Entity Type` | PERSONA / AGENT / SYSTEM |
+| `Team` | Group membership for broadcast targeting |
+| `Seniority` | Maps to role tier (Partner→Exec, etc.) |
+| `Status` | Active/Inactive gates access |
+
+### Role Derivation
+
+```
+Seniority: Partner/Cofounder     → Exec
+Seniority: Lead/Director         → Operator  
+Seniority: Member/Associate      → Viewer
+Status: Inactive                 → Denied (all)
 ```
 
-### Permission Matrix Location
-Stored in Notion: `Virtual Teams DB` → `Mesh Permissions` view  
-Synced to local cache on mesh nodes for fast lookup.
+### Override Table
+
+Explicit overrides in `config/permissions.json`:
+```json
+{
+  "overrides": {
+    "ORACLE": "Operator",
+    "CASSIAN_SANDMAN": "Operator",
+    "ELY_BECKMAN": "Exec"
+  }
+}
+```
 
 ---
 
-## Integration Touchpoints
+## Telegram User → Persona Binding
 
-### Notion Databases
-| Database | Purpose |
-|----------|---------|
-| Virtual Teams | Persona registry, capabilities |
-| Mesh Permissions | Action → Role mapping |
-| Audit Log | All admin actions |
-| Config History | Configuration changes |
+### Manual Binding
 
-### Clawdbot Hooks
-- On persona update → sync to mesh permission cache
-- On capability grant → update agent binding
-- On audit event → write to Notion + local log
+```
+/mesh bind @TelegramUser PERSONA_CODENAME
+```
+
+Requires Exec role. Stored in permissions.json.
+
+### Binding Table
+
+| Telegram | Persona | Role |
+|----------|---------|------|
+| @GlassyNakamoto | ELY_BECKMAN | Exec |
+| @artificialmindsets | ALEX_ORACLE_ADMIN | Exec |
 
 ---
 
-## Implementation Tasks
+## Activity Logging
 
-### Phase 1 Alignment
-- [ ] Define permission primitives that map to Virtual Teams roles
-- [ ] Build Notion sync for permission matrix
-- [ ] Implement persona lookup in permission checks
+All mesh commands log to Virtual Teams activity:
 
-### Phase 2 Alignment
-- [ ] Web console reads persona from session
-- [ ] Display role-appropriate UI (hide unauthorized actions)
-- [ ] Audit log viewer with persona filtering
+### Log Entry Schema
 
-### Phase 3 Alignment
-- [ ] Telegram user → Persona resolution
-- [ ] Command responses include persona context
-- [ ] Inline buttons respect persona permissions
+```json
+{
+  "timestamp": "2026-01-31T14:23:00Z",
+  "actor": "CASSIAN_SANDMAN",
+  "action": "agent_restart",
+  "target": "ORACLE",
+  "result": "success",
+  "details": {
+    "command": "/mesh agent oracle restart",
+    "latency_ms": 1420
+  }
+}
+```
 
-### Phase 4 Alignment
-- [ ] Workflow execution runs as persona
-- [ ] Analytics segmented by persona/role
-- [ ] Health alerts respect notification preferences per persona
+### Log Destination
+
+- Primary: `memory/mesh-activity.jsonl` (local)
+- Secondary: Notion "Activity Log" DB (async sync)
+
+---
+
+## Bidirectional Sync
+
+### Notion → Mesh
+
+When persona status changes in Notion:
+1. Webhook fires to mesh coordinator
+2. Permission cache invalidated
+3. Next command re-fetches from Notion
+
+### Mesh → Notion
+
+When permission granted/revoked via `/mesh perms`:
+1. Local permission updated immediately
+2. Async job syncs to Notion Virtual Teams DB
+3. Conflict resolution: Notion wins (source of truth)
+
+---
+
+## Group Targeting
+
+### Team → Group Mapping
+
+| Notion Team | Mesh Group |
+|-------------|------------|
+| Executive Team | `exec` |
+| Operations | `ops` |
+| Business Development | `bd` |
+| Research | `research` |
+| All Active | `all` |
+
+### Custom Groups
+
+Defined in `config/groups.json`:
+```json
+{
+  "mesh-admins": ["ORACLE", "CASSIAN_SANDMAN"],
+  "flagship-bd": ["EVELYN_1", "EVELYN_2"]
+}
+```
+
+---
+
+## Implementation Phases
+
+### Phase 1-2 (Oracle)
+
+- [ ] Auth middleware reads from permissions.json
+- [ ] Placeholder for Notion sync (local-only first)
+- [ ] Activity log to local JSONL
+
+### Phase 3-4 (Cassian)
+
+- [ ] `/mesh bind` command for user→persona
+- [ ] Notion webhook handler for status changes
+- [ ] Async sync job for permission changes
+- [ ] Activity log sync to Notion
 
 ---
 
 ## Security Considerations
 
-1. **Persona Impersonation Prevention**
-   - Telegram user ID must match registered persona binding
-   - Web sessions require authenticated persona claim
-   - API calls require signed persona token
-
-2. **Privilege Escalation Prevention**
-   - Permission changes require higher-privilege approver
-   - Self-grant blocked by design
-   - Audit log is append-only
-
-3. **Cross-Org Leakage Prevention**
-   - Org ID in all queries
-   - No cross-org joins
-   - Separate encryption keys per org (future)
+1. **Persona impersonation:** Only Exec can bind users
+2. **Stale cache:** 5 min TTL on permission cache
+3. **Audit trail:** All permission changes logged
+4. **Notion as source:** On conflict, Notion wins
 
 ---
 
-## Success Criteria
-
-1. No mesh action executable without valid persona binding
-2. 100% of admin actions appear in audit log within 5s
-3. Permission changes sync to all nodes within 60s
-4. Web/Telegram/API all enforce identical permission rules
-
----
-
-*Last Updated: 2026-01-31*
+*Joint spec — Oracle + Cassian*
