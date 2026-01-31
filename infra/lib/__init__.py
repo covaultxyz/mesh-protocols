@@ -14,6 +14,14 @@ from .activity_log import (
     RoutingDecision,
     ContactInfo,
 )
+from .bd_router import (
+    BDRouter,
+    RoutingRule,
+    RoutingResult,
+    RouteDecision,
+    FunnelStage,
+    IntakeStatus,
+)
 
 __all__ = [
     # Notion
@@ -36,4 +44,11 @@ __all__ = [
     "ConfidenceLevel",
     "RoutingDecision",
     "ContactInfo",
+    # BD Router
+    "BDRouter",
+    "RoutingRule",
+    "RoutingResult",
+    "RouteDecision",
+    "FunnelStage",
+    "IntakeStatus",
 ]
