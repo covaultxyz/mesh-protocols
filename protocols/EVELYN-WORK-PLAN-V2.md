@@ -96,45 +96,77 @@
 
 ## Phase 3: Telegram Bot [CASSIAN]
 
-**Goal:** *(Cassian to define tasks)*
+**Goal:** Build mesh admin commands via Telegram, integrated with Virtual Teams personas
 
-### 3.1 Persona & Voice
-- [ ] *TBD by Cassian*
+📄 **Full Spec:** [`tasks/PHASE-3-TELEGRAM-BOT.md`](../tasks/PHASE-3-TELEGRAM-BOT.md)
 
-### 3.2 Routing Logic
-- [ ] *TBD by Cassian*
+### 3.1 Core Bot Command Framework
+- [ ] Design command routing architecture
+- [ ] Implement `/mesh` command namespace
+- [ ] Build permission check middleware
+- [ ] Create response formatters (inline buttons, structured messages)
 
-### 3.3 Virtual Team Integration
-- [ ] *TBD by Cassian*
+### 3.2 Status & Monitoring Commands
+- [ ] `/mesh status`, `/mesh agents`, `/mesh ping`, `/mesh logs`
+
+### 3.3 Permission Management Commands
+- [ ] `/mesh perms list/grant/revoke/audit`
+
+### 3.4 Agent Management Commands
+- [ ] `/mesh agent <name> info/restart/pause/resume`
+
+### 3.5 Virtual Teams Integration
+- [ ] Map commands to persona permissions
+- [ ] Role-based access (Exec/Operator/Viewer)
+- [ ] Audit trail to Virtual Teams
 
 ---
 
 ## Phase 4: Advanced Features [CASSIAN]
 
-**Goal:** *(Cassian to define tasks)*
+**Goal:** Multi-agent orchestration, health monitoring, config management, workflows
 
-### 4.1 Meeting Prep
-- [ ] *TBD by Cassian*
+📄 **Full Spec:** [`tasks/PHASE-4-ADVANCED-FEATURES.md`](../tasks/PHASE-4-ADVANCED-FEATURES.md)
 
-### 4.2 Objection Handling
-- [ ] *TBD by Cassian*
+### 4.1 Multi-Agent Broadcast
+- [ ] `/mesh broadcast` with ACK tracking
+- [ ] Group targeting, templated messages
 
-### 4.3 Deal Intelligence
-- [ ] *TBD by Cassian*
+### 4.2 Automated Health Monitoring
+- [ ] Scheduled health sweeps
+- [ ] Alert routing, degradation detection
+- [ ] Auto-recovery triggers
+
+### 4.3 Configuration Management
+- [ ] `/mesh config view/set/diff/apply/rollback`
+- [ ] Version history with diff tracking
+
+### 4.4 Workflow Automation
+- [ ] Workflow DSL (sequence, parallel, conditional)
+- [ ] Pre-built workflows: daily health check, restart sequence
+
+### 4.5 Evelyn-Specific Extensions
+- [ ] Meeting prep intelligence
+- [ ] Objection handling library
+- [ ] Deal intelligence dashboards
 
 ---
 
 ## Shared Responsibilities
 
+📄 **Virtual Teams Integration:** [`tasks/VIRTUAL-TEAMS-INTEGRATION.md`](../tasks/VIRTUAL-TEAMS-INTEGRATION.md)
+
 ### Protocol Definitions
 - [ ] Define API contract between phases (Oracle implements, both contribute)
 - [ ] Document handoff patterns (Oracle → Cassian at Telegram layer)
 - [ ] Create integration test suite (both own their phase tests)
+- [ ] Align permission model with Virtual Teams personas (see spec)
 
 ### Testing
 - [ ] Oracle: Phase 1-2 unit + integration tests
 - [ ] Cassian: Phase 3-4 tests
 - [ ] Joint: End-to-end flow testing
+- [ ] Joint: Virtual Teams integration validation
 
 ---
 
