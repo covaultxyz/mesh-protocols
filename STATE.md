@@ -20,7 +20,7 @@
 |---|------|-------|--------|----------|
 | 1 | State Log + Activity Logger | Oracle | ✅ Done | No |
 | 2 | Voice Mode Phase 2-4 | Oracle | ⏸️ Paused | Awaiting voice pick |
-| 3 | VoltAgent Night Shift | Sandman | 🔄 Active | No |
+| 3 | VoltAgent Night Shift | Sandman | ⏳ Queued | No |
 | 4 | Notion Activity Sync | TBD | ⏳ Queued | No |
 
 ---
