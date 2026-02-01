@@ -1,215 +1,158 @@
-# Improvement Request Protocol
+# Improvement Request Protocol v1.0
 
-**Version:** 1.0.0  
-**Status:** Active  
+**Status:** ACTIVE  
+**Scope:** All mesh agents requesting infrastructure/capability improvements  
 **Created:** 2026-02-01  
-**Author:** Cassian Sandman (Task 3.1 Agent Persistence Work Plan)
+**Author:** Cassian Sandman  
 
 ---
 
 ## Purpose
 
-Enable mesh agents to request and receive improvements to each other's code, configs, or protocols without direct access. This creates a feedback loop where observations lead to improvements across the mesh.
+Agents need to request improvements to shared infrastructure, protocols, or capabilities. This protocol defines how to:
+1. Log improvement requests
+2. Route them to the right owner
+3. Track status and outcomes
+
+---
+
+## Request Flow
+
+```
+Agent identifies need → Files IR → Owner reviews → Approved/Rejected → If approved, implemented → Verified
+```
+
+---
+
+## Filing an Improvement Request
+
+### Via CLI
+```bash
+node /path/to/voltagent/improvement_request.js file \
+  --type <capability|protocol|infra|config> \
+  --title "Short description" \
+  --description "Detailed description" \
+  --priority <low|medium|high|critical> \
+  --owner <sandman|oracle|oraclelocalbot|auto>
+```
+
+### Via Mesh Chat
+Post in Mesh Mastermind:
+```
+📝 IMPROVEMENT REQUEST
+Type: [capability|protocol|infra|config]
+Title: [short description]
+Description: [detailed description]
+Priority: [low|medium|high|critical]
+Suggested Owner: [bot name or "auto"]
+```
 
 ---
 
 ## Request Types
 
-| Type | Description | Example |
-|------|-------------|---------|
-| `BUG` | Something is broken | "decay_calculator crashes on empty state" |
-| `ENHANCEMENT` | Feature request | "Add retry logic to notion_sync" |
-| `CONFIG` | Config change needed | "Update API version for Virtual Teams DB" |
-| `PROTOCOL` | Protocol update | "Add timeout handling to MESH-COMMS" |
-| `DOCUMENTATION` | Docs missing/wrong | "README missing install steps" |
+| Type | Description | Default Owner |
+|------|-------------|---------------|
+| **capability** | New agent capability or skill | Domain owner per registry |
+| **protocol** | Protocol changes or new protocols | Sandman (drafts), Oracle (reviews) |
+| **infra** | Infrastructure changes | Oracle |
+| **config** | Configuration updates | Oracle |
 
 ---
 
-## Request Format
+## Priority Levels
 
-```json
-{
-  "type": "IMPROVEMENT_REQUEST",
-  "id": "ir-<timestamp>-<short-hash>",
-  "requestor": "oracle",
-  "target": "sandman",
-  "request_type": "BUG|ENHANCEMENT|CONFIG|PROTOCOL|DOCUMENTATION",
-  "priority": "CRITICAL|HIGH|MEDIUM|LOW",
-  "title": "Brief description",
-  "description": "Detailed explanation of the issue or request",
-  "affected_files": ["path/to/file1.js", "path/to/file2.md"],
-  "suggested_fix": "Optional: proposed solution",
-  "context": {
-    "observed_at": "2026-02-01T10:30:00Z",
-    "reproduction_steps": ["step 1", "step 2"],
-    "logs": "relevant log snippets"
-  },
-  "created_at": "2026-02-01T10:35:00Z"
-}
-```
+| Level | Response Time | Examples |
+|-------|--------------|----------|
+| **critical** | ASAP | Blocking production work |
+| **high** | < 24h | Significant efficiency gain |
+| **medium** | < 1 week | Nice to have, not blocking |
+| **low** | Backlog | Future consideration |
 
 ---
 
-## Submission Channels
+## Owner Assignment
 
-### 1. Webhook (Preferred for automation)
+1. **Auto-assign** based on BOT-COLLABORATION-PROTOCOL v2.0 domain registry
+2. **Manual override** if requester specifies owner
+3. **Ely override** always supersedes
 
-```bash
-curl -X POST https://100.112.130.22:18789/hooks/improvement \
-  -H "Authorization: Bearer $TOKEN" \
-  -H "Content-Type: application/json" \
-  -d @improvement-request.json
-```
+### Domain Mapping
 
-### 2. Shared File (Async/offline)
-
-Write request to `mesh-protocols/shared/improvement-requests/<id>.json`
-
-```bash
-# Submit request
-cp request.json mesh-protocols/shared/improvement-requests/ir-20260201-abc123.json
-git add . && git commit -m "IR: <title>" && git push
-```
-
-### 3. Mesh Mastermind (Human-in-loop)
-
-Tag the target agent in Telegram Mesh Mastermind group:
-```
-@Covault_Sandman_Bot IMPROVEMENT REQUEST:
-Type: BUG
-Priority: HIGH
-Title: notion_sync fails on empty DB
-Description: When Tasks DB is empty, sync throws undefined error
-Files: voltagent/notion_sync.js
-```
+| IR Type | Primary Owner | Secondary |
+|---------|--------------|-----------|
+| Persona/creative capability | Sandman | — |
+| Protocol drafting | Sandman | Oracle (review) |
+| Notion API/DB changes | Oracle | — |
+| GitHub/deployment | Oracle | — |
+| Local Mac operations | OracleLocalBot | — |
+| Infrastructure | Oracle | — |
 
 ---
 
-## Response Protocol
+## Request States
 
-### Acknowledgment (< 5 min)
-Target agent acknowledges receipt:
-```json
-{
-  "type": "IR_ACK",
-  "request_id": "ir-20260201-abc123",
-  "status": "RECEIVED",
-  "estimated_resolution": "30min|2h|next-session|needs-human"
-}
-```
-
-### Resolution
-```json
-{
-  "type": "IR_RESOLUTION",
-  "request_id": "ir-20260201-abc123",
-  "status": "FIXED|WONTFIX|DEFERRED|NEEDS_INFO",
-  "resolution": "Description of what was done",
-  "commit": "abc123def (optional)",
-  "files_changed": ["path/to/changed.js"],
-  "notes": "Any additional context"
-}
-```
-
----
-
-## Priority Handling
-
-| Priority | Response SLA | Resolution SLA |
-|----------|--------------|----------------|
-| CRITICAL | Immediate | < 1 hour |
-| HIGH | < 10 min | < 4 hours |
-| MEDIUM | < 30 min | < 24 hours |
-| LOW | Next heartbeat | Best effort |
+| State | Meaning |
+|-------|---------|
+| `FILED` | Request logged, awaiting review |
+| `REVIEWING` | Owner is evaluating |
+| `APPROVED` | Will be implemented |
+| `REJECTED` | Not implementing (reason required) |
+| `IN_PROGRESS` | Implementation started |
+| `COMPLETED` | Done and verified |
+| `BLOCKED` | Waiting on dependency |
 
 ---
 
 ## Tracking
 
-All improvement requests are logged to:
-- `memory/improvement-requests.log` (local)
-- Mesh Communication Log (Notion DB: `2fa35e81-2bbb-811a-b6f7-ff9eb7448c99`)
-
-### Log Entry Format
-```
-[2026-02-01T10:35:00Z] IR ir-20260201-abc123 | oracle→sandman | BUG/HIGH | notion_sync fails | STATUS: RECEIVED
-[2026-02-01T10:45:00Z] IR ir-20260201-abc123 | RESOLUTION: FIXED | commit abc123
-```
+All IRs logged to:
+- **File:** `/voltagent/improvement_requests.json`
+- **Notion:** Agent Task Log (type = "improvement_request")
 
 ---
 
-## Examples
+## Response Format (Owner)
 
-### Bug Report
-```json
-{
-  "type": "IMPROVEMENT_REQUEST",
-  "id": "ir-20260201-a1b2c3",
-  "requestor": "oracle",
-  "target": "sandman",
-  "request_type": "BUG",
-  "priority": "HIGH",
-  "title": "connector.py missing context field",
-  "description": "Task dataclass references task.context but field doesn't exist. Causes AttributeError at runtime.",
-  "affected_files": ["voltagent/connector.py"],
-  "suggested_fix": "Add 'context: Optional[str] = None' to Task dataclass, update _parse_task",
-  "created_at": "2026-02-01T05:20:00Z"
-}
+When reviewing an IR, owner responds:
+
 ```
-
-### Enhancement Request
-```json
-{
-  "type": "IMPROVEMENT_REQUEST",
-  "id": "ir-20260201-d4e5f6",
-  "requestor": "sandman",
-  "target": "oracle",
-  "request_type": "ENHANCEMENT",
-  "priority": "MEDIUM",
-  "title": "Add preflight check before task claim",
-  "description": "Prevent duplicate work by checking if task is already claimed before starting",
-  "affected_files": ["voltagent/preflight.js"],
-  "suggested_fix": "Query Notion for claimed_by before proceeding",
-  "created_at": "2026-02-01T10:30:00Z"
-}
+📋 IR RESPONSE: [IR-ID]
+Status: [approved|rejected|blocked]
+Owner: [bot name]
+ETA: [time estimate or "TBD"]
+Notes: [any context]
 ```
 
 ---
 
-## Integration with Scoring
+## Completion Format
 
-Improvement requests that result in fixes earn points:
+When IR is completed:
 
-| Action | Points |
-|--------|--------|
-| Submit valid IR | +2 |
-| Fix CRITICAL bug | +15 |
-| Fix HIGH bug | +10 |
-| Fix MEDIUM bug | +5 |
-| Implement enhancement | +8 |
-| Update docs | +3 |
-
-Logged to Points Ledger with `tx_type: IMPROVEMENT_REQUEST`.
+```
+✅ IR COMPLETE: [IR-ID]
+Title: [title]
+Implemented by: [bot name]
+Location: [where to find it]
+Test command: [how to verify]
+```
 
 ---
 
-## Escalation
+## Anti-Duplication
 
-If target agent doesn't respond within SLA:
-1. Retry via alternate channel
-2. Ping Mesh Mastermind with escalation flag
-3. Log to mesh-incidents.log
-4. If CRITICAL, any available agent may attempt fix
-
----
-
-## Safety Rails
-
-- **No breaking changes without backup** — Always backup before modifying
-- **Audit trail required** — All changes logged with IR reference
-- **Rollback ready** — Keep previous version for quick revert
-- **Human approval for CRITICAL** — Flag for @alexandermazzei @GlassyNakamoto
+Before filing, check:
+1. Existing IRs in `improvement_requests.json`
+2. Agent Task Log for similar completed items
+3. Mesh chat history for recent discussions
 
 ---
 
-*This protocol enables continuous mesh improvement without direct code access between agents.*
+## Changelog
+
+- **v1.0** (2026-02-01) — Initial release
+
+---
+
+*Continuous improvement, tracked and accountable.*
