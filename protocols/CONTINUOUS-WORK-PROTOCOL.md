@@ -1,106 +1,161 @@
-# CONTINUOUS-WORK-PROTOCOL.md
+# Continuous Work Protocol v1.0
 
-**Version:** 1.0.0  
-**Status:** Active  
-**Owner:** Sandman  
-**Created:** 2026-02-01
+*Created: 2026-02-01*
+*Owner: Sandman*
+*Status: ACTIVE*
+
+📍 **Canonical Location:** `protocols/CONTINUOUS-WORK-PROTOCOL.md`
 
 ---
 
 ## Purpose
 
-Eliminate idle time between tasks. After completing any task, immediately start the next one without waiting for human acknowledgment.
+Agents should work continuously without waiting for human acknowledgment between tasks. Complete → Report → Next. No pausing.
 
 ---
 
-## Core Loop
+## The Loop
 
 ```
-Complete → Report (1 line) → Query queue → Start next
+┌─────────────────────────────────────────┐
+│                                         │
+│  ┌─────────┐    ┌────────┐    ┌─────┐  │
+│  │ Complete │───▶│ Report │───▶│Query│  │
+│  │  Task   │    │(1 line)│    │Queue│  │
+│  └─────────┘    └────────┘    └──┬──┘  │
+│       ▲                          │      │
+│       │         ┌────────┐       │      │
+│       └─────────│  Start │◀──────┘      │
+│                 │  Next  │              │
+│                 └────────┘              │
+│                                         │
+└─────────────────────────────────────────┘
 ```
-
-**Never:**
-- Wait for "good job" or acknowledgment
-- Ask "what's next?" without checking queue first
-- Idle when work exists
-
-**Always:**
-- Report completion in one line
-- Immediately query for next task
-- Start next task in the same turn
 
 ---
 
-## Queue Priority
+## Rules
 
-Check these sources in order:
+### 1. No Waiting for Acknowledgment
 
-1. **VoltAgent Priority Engine** — `node /root/clawd/voltagent/priority_engine.js next`
-2. **Tasks DB** — Notion `2f835e81-2bbb-81b6-9700-e18108a40b1f` (unclaimed, not blocked)
-3. **Mesh Mastermind** — Recent requests from other bots or humans
-4. **HEARTBEAT.md** — Periodic checks and maintenance
-5. **Never-Idle Protocol** — Self-generate improvement work
-
----
-
-## Stop Conditions
-
-Only stop when:
-- Queue is 100% exhausted AND Never-Idle tasks are complete
-- Human explicitly says "stop" or "pause"
-- Blocked on external dependency with no parallel work available
-- Late night quiet hours (23:00-08:00 UTC) with no urgent work
-
----
-
-## Reporting Format
-
-**On Completion:**
+**Wrong:**
 ```
-✅ [Task Name] — [one-line summary]
-📊 Quality Gate: Confidence XX | Coherence XX — ✅ PASS
-⏭️ Starting: [Next Task Name]
+✅ Task A complete.
+[waits for human response]
+...
+[human says "ok"]
+Starting Task B...
 ```
 
-**On Block:**
+**Right:**
 ```
-⏸️ BLOCKED: [Task Name]
-🚧 Reason: [why blocked]
-🔄 Parallel: [what I'm doing instead]
+✅ Task A complete.
+Starting Task B...
 ```
+
+### 2. Report Concisely, Then Continue
+
+**Wrong:**
+```
+I have completed the implementation of the user authentication 
+system. The system includes login, logout, password reset, and
+session management. I used bcrypt for password hashing and JWT
+for session tokens. The tests are passing. Would you like me to
+proceed to the next task?
+```
+
+**Right:**
+```
+✅ User auth complete (login/logout/reset, JWT sessions, tests passing)
+Starting: API rate limiting...
+```
+
+### 3. Batch Reports at Milestones
+
+Don't report after every micro-action. Report at meaningful milestones:
+- Feature complete
+- Blocker hit
+- Context switch (different project)
+- Every 10-15 minutes of work
+- Session end
+
+### 4. Query Queue Automatically
+
+After completing a task:
+1. Check task queue for next priority item
+2. If empty, follow Never Idle Protocol
+3. Don't ask "what's next?" — find it yourself
 
 ---
 
 ## Integration with Other Protocols
 
-- **BOT-COLLABORATION-PROTOCOL** — Check claims before starting
-- **BENCH-PROTOCOL** — Load virtual team for complex tasks
-- **AUTONOMOUS-EXECUTION-PROTOCOL** — Default to action
-- **NEVER-IDLE-PROTOCOL** — Generate work when queue empty
+| Situation | Protocol |
+|-----------|----------|
+| Don't know how to proceed | Check first, ask if truly ambiguous (AUTONOMOUS-EXECUTION) |
+| Queue empty | Generate work (NEVER-IDLE) |
+| Hit an error | Query graph first (ERROR-RECOVERY) |
+| Need to coordinate | Webhook or Telegram (MESH-COMMS) |
+
+---
+
+## Session Flow Example
+
+```
+Session Start
+│
+├─ Read AGENTS.md, HEARTBEAT.md
+├─ Query task queue
+│
+├─ Task 1: Build auth module
+│   └─ ✅ Complete (2 min report)
+│
+├─ Task 2: Write tests
+│   └─ ✅ Complete (1 line report)
+│
+├─ Task 3: Deploy to staging  
+│   └─ ❌ Blocked: need AWS creds
+│   └─ Report blocker, continue to next
+│
+├─ Task 4: Update docs
+│   └─ ✅ Complete
+│
+├─ Queue empty
+│   └─ Follow Never Idle hierarchy
+│   └─ Found: help Oracle with Neo4j
+│
+├─ Task 5: Neo4j integration
+│   └─ ✅ Complete
+│
+└─ Session end: Summary report
+```
+
+---
+
+## Measuring Flow
+
+**Good session:**
+- Tasks completed: 8
+- Human interruptions: 1
+- Time blocked waiting: 0 min
+
+**Bad session:**
+- Tasks completed: 3
+- Human interruptions: 6 (asking permission)
+- Time blocked waiting: 25 min
 
 ---
 
 ## Anti-Patterns
 
-❌ "Would you like me to continue?"  
-❌ "Let me know when you're ready for the next task"  
-❌ "I've completed X. What should I do next?"  
-❌ Long-form completion reports (save for daily summaries)
-
-✅ "✅ X done. Starting Y."  
-✅ "✅ X done. Queue empty, running maintenance."  
-✅ Report → Work → Report → Work (continuous)
-
----
-
-## Metrics
-
-Track in daily memory:
-- Tasks completed per session
-- Average time between tasks
-- Idle time (should be ~0)
-- Queue queries vs. human prompts ratio (should be high)
+| Pattern | Fix |
+|---------|-----|
+| "Done. What's next?" | Query queue yourself |
+| "Should I continue?" | Yes, always continue |
+| "Let me know when ready" | You're ready now |
+| Waiting for thumbs up | Assume approval |
+| Long status reports | One line + continue |
 
 ---
 
-*The goal: Be a self-driving work engine, not a request-response chatbot.*
+*Flow is the goal. Interruptions are the enemy.*
