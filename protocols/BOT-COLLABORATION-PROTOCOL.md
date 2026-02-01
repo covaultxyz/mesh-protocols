@@ -1,9 +1,9 @@
-# Bot Collaboration Protocol v2.0
+# Bot Collaboration Protocol v2.1
 
 **Status:** ACTIVE  
 **Scope:** All mesh agents (N-bot scalable)  
 **Created:** 2026-01-31  
-**Updated:** 2026-02-01 (v2.0 - N-bot support, registry, broadcast claims)  
+**Updated:** 2026-02-01 (v2.1 - Task takeover process)  
 **Notion:** https://www.notion.so/Bot-Collaboration-Protocol-v1-0-2f935e812bbb818e8697de52fe6d416e
 
 ---
@@ -154,6 +154,48 @@ If multiple bots started the same task:
 
 ---
 
+## 🔄 Task Takeover (v2.1)
+
+When a task owner is unresponsive, another bot can take over:
+
+### Takeover Conditions
+- Original owner has not responded in **30+ minutes**
+- Task is blocking other work or time-sensitive
+- Taking-over bot has domain overlap or capability
+
+### Takeover Process
+
+1. **PING OWNER** — Tag them directly, ask for status
+2. **WAIT 5 MIN** — Give them a chance to respond
+3. **ANNOUNCE TAKEOVER** — Post in Mesh Mastermind:
+```
+📢 TAKEOVER NOTICE: [task]
+Original owner: [bot]
+Reason: Unresponsive for [time]
+New owner: [taking-over bot]
+@[original_owner] — Confirm you were NOT working on this
+```
+4. **PROCEED** — Start work
+5. **MERGE IF NEEDED** — If original owner had WIP, merge it
+
+### Takeover Acknowledgment
+
+Original owner should respond:
+```
+✅ TAKEOVER ACK — I was not working on [task]. Proceed.
+```
+or
+```
+⚠️ TAKEOVER CONFLICT — I have WIP. [status/location]
+```
+
+### Post-Takeover
+- Update work plan to reflect new owner
+- Log in Mesh Work Log
+- Credit original owner if they contributed
+
+---
+
 ## 👑 When Ely Gives a Task
 
 When Ely requests something:
@@ -222,6 +264,7 @@ If context is truncated, recover state from:
 - **v1.0** (2026-01-31) — Initial release (2-bot)
 - **v1.1** (2026-01-31) — Added exclusive tasks, ACK requirement, anti-collision checklist
 - **v2.0** (2026-02-01) — N-bot support, bot registry, domain-first routing, broadcast claims, removed 2-bot assumptions
+- **v2.1** (2026-02-01) — Added task takeover process for unresponsive owners (30+ min threshold, notification requirements, merge process)
 
 ---
 
