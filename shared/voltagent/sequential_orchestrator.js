@@ -392,7 +392,8 @@ function abortRun(reason) {
   return aborted;
 }
 
-// CLI
+// CLI (only run if executed directly)
+if (require.main === module) {
 const args = process.argv.slice(2);
 const command = args[0] || 'help';
 
@@ -498,6 +499,7 @@ Usage:
 Task States: PENDING → READY → RUNNING → COMPLETED/FAILED/SKIPPED/BLOCKED
 `);
 }
+} // end CLI block
 
 // Export for use as module
 module.exports = {

@@ -258,7 +258,8 @@ function getCheckpointStats() {
   };
 }
 
-// CLI
+// CLI (only run if executed directly)
+if (require.main === module) {
 const args = process.argv.slice(2);
 const command = args[0] || 'help';
 
@@ -348,6 +349,7 @@ Examples:
   checkpoint_validator.js stats
 `);
 }
+} // end CLI block
 
 // Export for use as module
 module.exports = {

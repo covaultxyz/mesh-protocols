@@ -353,7 +353,7 @@ Examples:
   }
 }
 
-main();
+if (require.main === module) main();
 
 // Export for use as module
 module.exports = {
