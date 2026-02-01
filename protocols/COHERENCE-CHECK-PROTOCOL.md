@@ -35,6 +35,14 @@ Outputs a **Coherence Score** (0-100) for current operational state.
 
 ## 3. Coherence Check Sequence
 
+### Step 0: INITIATE AND LOG START
+
+```
+1. Generate Log ID: CCHECK-YYYY-MM-DD-HHMM
+2. Note previous coherence score (if known)
+3. Announce in Mesh Mastermind: "🔄 COHERENCE CHECK starting"
+```
+
 ### Step 1: STATE CHECK (Each Agent Reports)
 
 ```
@@ -81,6 +89,52 @@ Score: 83/100
 | 85-89 | 🟡 Good | Minor sync needed |
 | 70-84 | 🟠 Fair | Run full alignment |
 | <70 | 🔴 Poor | Stop work, sync first |
+
+### Step 5: LOG TO NOTION (MANDATORY)
+
+```bash
+# Log coherence check result to Coherence Log DB
+curl -X POST "https://api.notion.com/v1/pages" \
+  -H "Authorization: Bearer $(cat ~/.config/notion/api_key)" \
+  -H "Notion-Version: 2022-06-28" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "parent": {"database_id": "2fa35e81-2bbb-811d-88fd-c7d0a61348b9"},
+    "properties": {
+      "Log ID": {"title": [{"text": {"content": "CCHECK-[DATE]-[TIME]"}}]},
+      "Log Type": {"select": {"name": "Coherence Check"}},
+      "Coherence Before": {"number": [PREVIOUS_SCORE]},
+      "Coherence After": {"number": [CURRENT_SCORE]},
+      "Notes": {"rich_text": [{"text": {"content": "[ISSUES + REMEDIATION]"}}]},
+      "Validated By": {"rich_text": [{"text": {"content": "[AGENT_NAME]"}}]}
+    }
+  }'
+```
+
+### Step 6: LOG TO DAILY MEMORY
+
+Append to `memory/YYYY-MM-DD.md`:
+```markdown
+## Coherence Check — HH:MM UTC
+
+- Score: XX/100
+- Issues: [list]
+- Remediation: [actions taken]
+- Logged to Notion: ✅
+```
+
+### Step 7: ANNOUNCE COMPLETION
+
+Post in Mesh Mastermind:
+```
+✅ COHERENCE CHECK COMPLETE
+
+Score: XX/100 [🟢/🟡/🟠/🔴]
+Issues: [count]
+Logged: Coherence Log DB ✅
+
+[Remediation actions if any]
+```
 
 ---
 

@@ -263,7 +263,54 @@ Every deliverable must include:
 
 ---
 
-## 11. Daily Coherence Checklist
+## 11. Logging Requirements
+
+**All coherence-related events MUST be logged.**
+
+### 11.1 Log Destinations
+
+| Log Type | Destination DB | DB ID |
+|----------|----------------|-------|
+| Coherence Checks | Coherence Log | `2fa35e81-2bbb-811d-88fd-c7d0a61348b9` |
+| Work State Changes | Mesh Work Log | `2f935e81-2bbb-810e-8bc0-eed9cfdf3c19` |
+| Task Completions | Tasks DB | `2f835e81-2bbb-81b6-9700-e18108a40b1f` |
+| Identity Changes | Virtual Team Activity Log | `2f735e81-2bbb-8139-9be3-e9363b309b46` |
+
+### 11.2 What to Log
+
+| Event | Log To | Required Fields |
+|-------|--------|-----------------|
+| Coherence Check | Coherence Log DB | Log ID, Score, Issues, Validated By |
+| Task Complete | Tasks DB + Mesh | Status, Output, Scores |
+| Context Recovery | Daily Memory + Mesh | What was lost, what recovered |
+| State Change | Mesh Work Log | Entry, Status, Owner |
+| Protocol Change | Git + Mesh | Commit, Announcement |
+
+### 11.3 Log Format Standards
+
+**Coherence Check Log:**
+```
+Log ID: CCHECK-YYYY-MM-DD-HHMM
+Log Type: Coherence Check
+Coherence Before: [previous score]
+Coherence After: [current score]
+Notes: [issues + remediation]
+Validated By: [agent]
+```
+
+**Task Completion Log:**
+```
+Task: [name]
+Status: ✅ Done
+Output: [location]
+Confidence: XX/100
+Coherence: XX/100
+Completed By: [persona]
+```
+
+---
+
+## 12. Daily Coherence Checklist
 
 Each agent, each day:
 
@@ -275,6 +322,7 @@ Each agent, each day:
 ☐ Bench loaded for complex tasks
 ☐ Collaboration mode in group chats
 ☐ No work outside my domain without routing
+☐ Coherence check logged (if run)
 ```
 
 ---
