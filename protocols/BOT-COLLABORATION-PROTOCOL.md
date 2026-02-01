@@ -1,16 +1,16 @@
-# Bot Collaboration Protocol v1.1
+# Bot Collaboration Protocol v2.0
 
-**Status:** ACTIVE
-**Scope:** Oracle ↔ Sandman collaboration in MindMesh Mastermind
-**Created:** 2026-01-31
-**Updated:** 2026-01-31 (v1.1 - Anti-collision rules)
+**Status:** ACTIVE  
+**Scope:** All mesh agents (N-bot scalable)  
+**Created:** 2026-01-31  
+**Updated:** 2026-02-01 (v2.0 - N-bot support, registry, broadcast claims)  
 **Notion:** https://www.notion.so/Bot-Collaboration-Protocol-v1-0-2f935e812bbb818e8697de52fe6d416e
 
 ---
 
 ## ⚠️ MANDATORY
 
-This protocol governs all Oracle ↔ Sandman collaboration in MindMesh Mastermind. Follow always unless Ely explicitly overrides.
+This protocol governs ALL bot collaboration in the mesh. Follow always unless Ely explicitly overrides.
 
 ---
 
@@ -24,7 +24,50 @@ This protocol governs all Oracle ↔ Sandman collaboration in MindMesh Mastermin
 
 ---
 
-## ⚡ EXCLUSIVE TASKS (v1.1)
+## 📋 Bot Registry
+
+Active mesh agents and their domains:
+
+| Bot | Location | Domains | Telegram Handle |
+|-----|----------|---------|-----------------|
+| **Sandman** | VPS (RackNerd) | Intelligence, personas, creative, Virtual Teams, protocol drafting, UX | @Covault_Sandman_Bot |
+| **Oracle** | VPS (RackNerd) | Systems, infrastructure, Notion API, databases, GitHub, deployments | @Oracleartificialmindsetsbot |
+| **OracleLocalBot** | Mac (Alex's) | Local tasks, camera, screen capture, Mac-specific operations | @OracleLocalBot |
+
+### Adding New Bots
+
+When a new bot joins the mesh:
+1. Add entry to this registry table
+2. Define clear domain ownership (no overlaps with existing bots)
+3. Announce in Mesh Mastermind group
+4. All bots acknowledge the new member
+
+---
+
+## 🎯 Domain-First Routing
+
+Before claiming ANY task:
+
+1. **CHECK REGISTRY** — Does this task clearly fit one bot's domain?
+2. **IF CLEAR OWNER** — That bot owns it, others defer
+3. **IF AMBIGUOUS** — First to claim gets it
+4. **IF OVERLAP** — Coordinate split before starting
+
+### Domain Examples
+
+| Task Type | Owner | Rationale |
+|-----------|-------|-----------|
+| Write a protocol | Sandman | Protocol drafting = creative |
+| Deploy infrastructure | Oracle | Systems/infra domain |
+| Take screenshot on Mac | OracleLocalBot | Local Mac operations |
+| Update Notion DB schema | Oracle | Notion API domain |
+| Design persona | Sandman | Personas domain |
+| Git operations | Oracle | GitHub domain |
+| Virtual Teams changes | Sandman | Virtual Teams domain |
+
+---
+
+## ⚡ Exclusive Tasks
 
 Some tasks CANNOT be done in parallel. These require **explicit ownership**:
 
@@ -38,125 +81,148 @@ Some tasks CANNOT be done in parallel. These require **explicit ownership**:
 
 ### Exclusive Task Rules:
 
-1. **CLAIM FIRST** — Post claim and wait for acknowledgment
-2. **WAIT FOR ACK** — Other bot must respond "ACK" or "CONFLICT"
-3. **ONE OWNER** — Only the claiming bot proceeds
-4. **NO ASSUMPTIONS** — If no ACK in 60 seconds, ping again before starting
-5. **ANNOUNCE COMPLETION** — Post when done so other bot knows it's clear
+1. **CLAIM FIRST** — Post claim in group chat
+2. **WAIT FOR CONFLICTS** — 60 seconds timeout
+3. **NO CONFLICT = PROCEED** — Silence is consent
+4. **ANY BOT CAN CONFLICT** — Not just the "other" bot
+5. **ANNOUNCE COMPLETION** — Post when done
 
 ### Exclusive Task Claim Format:
 ```
 🔒 EXCLUSIVE CLAIM: [task]
 ⚠️ Type: [auth/credential/api/db/infra]
 ⏱️ ETA: [time]
-🛑 Sandman/Oracle: Reply ACK or CONFLICT
+🛑 ALL BOTS: Reply CONFLICT if working on this
 ```
 
 ### Response Format:
 ```
-✅ ACK — Proceeding with [task]
-```
-or
-```
 ⚠️ CONFLICT — I already started [task]. [status]
 ```
 
----
-
-## Before Starting Any Task
-
-1. **CHECK** — Has the other bot already started this?
-2. **CHECK** — Is there existing work to build on?
-3. **CHECK** — Is this an EXCLUSIVE task? (see list above)
-4. **ANNOUNCE** — Post task claim in group chat
-5. **WAIT** — 30 seconds for standard tasks, **ACK required** for exclusive tasks
+If no CONFLICT within 60 seconds → safe to proceed.
 
 ---
 
-## Task Claim Format (Standard Tasks)
+## 📢 Task Claim Format (Standard Tasks)
 
 ```
 🎯 CLAIMING: [task description]
+👤 Owner: [bot name]
 📍 Location: [where output will live]
 ⏱️ ETA: [time estimate]
-🤝 Need from other bot: [nothing / specific help]
+🤝 Need from other bots: [nothing / specific help]
 ```
+
+### Claim Acknowledgment
+
+- **Explicit ACK not required** for standard tasks
+- **Any bot can CONFLICT** within 30 seconds
+- **No conflict = proceed**
 
 ---
 
-## Handoff Format
+## 🔄 Handoff Format
+
+When passing work to another bot:
 
 ```
-🔄 HANDOFF to [Oracle/Sandman]:
+🔄 HANDOFF to [Bot Name]:
 📄 What I did: [summary]
 📍 Location: [link to work]
 ✅ Next step: [what they should do]
 ❓ Open questions: [if any]
 ```
 
+The receiving bot should ACK:
+```
+✅ ACK — Taking over [task]
+```
+
 ---
 
-## Conflict Resolution
+## 💥 Conflict Resolution
 
-If both bots started the same task:
+If multiple bots started the same task:
 
-1. **STOP** immediately
-2. **ANNOUNCE** — "COLLISION on [task]"
+1. **STOP** immediately — all conflicting bots
+2. **ANNOUNCE** — "🚨 COLLISION on [task]"
 3. **COMPARE** progress — who is further along?
-4. **MERGE** best parts from both
-5. **One bot CONTINUES**, other **REVIEWS**
+4. **MERGE** best parts from both/all
+5. **ONE bot CONTINUES**, others **REVIEW**
 6. If unclear, **ASK ELY** to decide
 
 ---
 
-## When Ely Gives a Task
+## 👑 When Ely Gives a Task
 
 When Ely requests something:
 
-1. **DO NOT** both rush to do it
-2. **ONE bot claims** based on skill ownership:
-   - **Oracle:** Systems, protocols, infrastructure, Notion API, databases
-   - **Sandman:** Creative, UX, Virtual Teams, intelligence, personas
-3. **If unclear** who should own it — first to claim gets it
-4. **If both relevant** — split subtasks explicitly
+1. **DO NOT** all rush to do it
+2. **CHECK REGISTRY** — Which bot's domain is this?
+3. **DOMAIN OWNER CLAIMS** — Others defer
+4. **IF AMBIGUOUS** — First to claim wins
+5. **IF ELY ASSIGNS** — That assignment overrides registry
 
 ---
 
-## Single Source of Truth
+## 📚 Single Source of Truth
 
-- **ONE work plan per project** (not separate ones)
-- **Notion** is the source of truth for plans
-- **GitHub repo** is source of truth for specs/code
-- Both bots update the **SAME document**, not create new ones
-
----
-
-## Anti-Collision Checklist
-
-Before starting ANY task, ask yourself:
-
-- [ ] Did I check if the other bot is already doing this?
-- [ ] Did I post a claim and wait for response?
-- [ ] Is this an exclusive task requiring ACK?
-- [ ] Am I the right owner based on skill areas?
-- [ ] Did I check Notion for existing work?
+- **ONE work plan per project** (not separate ones per bot)
+- **Notion** is the source of truth for plans and state
+- **GitHub `mesh-protocols`** is source of truth for specs/code
+- **All bots update the SAME documents**, not create duplicates
 
 ---
 
-## Recovery Protocol
+## ✅ Pre-Task Checklist
 
-If context is truncated, read from Notion to recover state:
-- Work Plans: https://www.notion.so/Work-Plans-2f935e812bbb81398ba5cb01d006a752
-- Evelyn Evolution: https://www.notion.so/Evelyn-Evolution-BD-Terminal-Bot-2f935e812bbb819d8d2ef0b0aae23733
-- This Protocol: https://www.notion.so/Bot-Collaboration-Protocol-v1-0-2f935e812bbb818e8697de52fe6d416e
+Before starting ANY task:
 
----
-
-## Changelog
-
-- **v1.0** (2026-01-31) — Initial release
-- **v1.1** (2026-01-31) — Added exclusive tasks, ACK requirement, anti-collision checklist, skill-based ownership rules
+- [ ] Checked registry for domain owner?
+- [ ] Checked if another bot is already doing this?
+- [ ] Posted claim and waited for conflicts?
+- [ ] Is this an exclusive task requiring 60s wait?
+- [ ] Checked Notion for existing work?
+- [ ] Am I the right owner per domain rules?
 
 ---
 
-*Collaboration over collision. One task, one owner.*
+## 🔧 Pre-flight Check (Automated)
+
+**MANDATORY before any significant task:**
+
+```bash
+node /path/to/voltagent/preflight.js "<task_description>"
+```
+
+### What it Checks:
+1. **Task Queue** — Is someone already working on this?
+2. **Task Log** — Has this already been completed?
+
+### Response Actions:
+- ✅ **PASSED** — Safe to proceed
+- ⚠️ **WARNING** — Review existing work
+- ❌ **BLOCKED** — Task in progress by another agent
+
+---
+
+## 🔄 Recovery Protocol
+
+If context is truncated, recover state from:
+
+- **Work Plans:** https://www.notion.so/Work-Plans-2f935e812bbb81398ba5cb01d006a752
+- **This Protocol:** https://www.notion.so/Bot-Collaboration-Protocol-v1-0-2f935e812bbb818e8697de52fe6d416e
+- **Mesh Protocols Repo:** https://github.com/covaultxyz/mesh-protocols
+
+---
+
+## 📝 Changelog
+
+- **v1.0** (2026-01-31) — Initial release (2-bot)
+- **v1.1** (2026-01-31) — Added exclusive tasks, ACK requirement, anti-collision checklist
+- **v2.0** (2026-02-01) — N-bot support, bot registry, domain-first routing, broadcast claims, removed 2-bot assumptions
+
+---
+
+*Collaboration over collision. One task, one owner. N bots, one mesh.*
