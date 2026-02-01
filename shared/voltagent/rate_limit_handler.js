@@ -136,6 +136,24 @@ function isRateLimited(response) {
 }
 
 /**
+ * Send alert to Telegram
+ */
+async function sendAlert(message, config = {}) {
+  const cfg = { ...DEFAULT_CONFIG, ...config };
+  
+  if (!cfg.alertOnOverflow) return;
+  
+  // Use notify.js if available
+  const notifyPath = '/root/clawd/voltagent/notify.js';
+  if (require('fs').existsSync(notifyPath)) {
+    const { spawn } = require('child_process');
+    spawn('node', [notifyPath, 'send', message], { stdio: 'inherit' });
+  }
+  
+  console.log(`📢 Alert: ${message}`);
+}
+
+/**
  * Handle rate limit detection
  */
 function handleRateLimit(config = {}) {
@@ -155,6 +173,9 @@ function handleRateLimit(config = {}) {
       reason: 'Rate limit detected',
       cooldownMs: state.currentCooldown
     });
+    
+    // Send alert (4.1)
+    sendAlert(`⚠️ **Rate Limit Triggered**\n\nEntering overflow mode.\nCooldown: ${state.currentCooldown / 1000}s\nTotal rate limits: ${state.totalRateLimits}`, cfg);
     
     console.log(`⚠️ Rate limit detected - entering overflow mode`);
     console.log(`   Cooldown: ${state.currentCooldown / 1000}s`);
@@ -301,6 +322,70 @@ ${stats.current.inOverflow ? `Started: ${stats.current.overflowStartedAt}\nCoold
 `;
 }
 
+/**
+ * Generate and optionally send daily summary (4.3)
+ */
+async function sendDailySummary(config = {}) {
+  const summary = generateSummary();
+  const stats = getStats();
+  
+  // Only alert if there were issues in the last 24h
+  if (stats.last24h.rateLimits > 0) {
+    await sendAlert(`📊 **Daily Overflow Report**\n${summary}`, config);
+  }
+  
+  logEvent('DAILY_SUMMARY', {
+    rateLimits24h: stats.last24h.rateLimits,
+    overflowTime24h: stats.last24h.totalOverflowTime
+  });
+  
+  return summary;
+}
+
+/**
+ * Check if overflow itself is hitting limits (4.4)
+ */
+function checkOverflowHealth(config = {}) {
+  const cfg = { ...DEFAULT_CONFIG, ...config };
+  const state = loadState();
+  const log = loadLog();
+  
+  // Check for overflow failures in last hour
+  const oneHourAgo = Date.now() - 60 * 60 * 1000;
+  const recentFailures = log.events.filter(e => 
+    e.type === 'OVERFLOW_FAILED' && 
+    new Date(e.timestamp).getTime() > oneHourAgo
+  );
+  
+  if (recentFailures.length >= 3) {
+    sendAlert(`🚨 **CRITICAL: Overflow Failing**\n\n${recentFailures.length} overflow failures in the last hour.\nBoth primary and overflow may be unavailable.`, cfg);
+    
+    logEvent('OVERFLOW_CRITICAL', {
+      failuresLastHour: recentFailures.length
+    });
+    
+    return { healthy: false, failures: recentFailures.length };
+  }
+  
+  // Check if we've been in overflow too long
+  if (state.inOverflow && state.overflowStartedAt) {
+    const overflowDuration = Date.now() - new Date(state.overflowStartedAt).getTime();
+    const maxOverflowDuration = 2 * 60 * 60 * 1000; // 2 hours
+    
+    if (overflowDuration > maxOverflowDuration) {
+      sendAlert(`⚠️ **Extended Overflow**\n\nIn overflow mode for ${Math.round(overflowDuration / 1000 / 60)} minutes.\nConsider investigating primary API status.`, cfg);
+      
+      logEvent('EXTENDED_OVERFLOW', {
+        durationMs: overflowDuration
+      });
+      
+      return { healthy: false, extended: true, durationMs: overflowDuration };
+    }
+  }
+  
+  return { healthy: true };
+}
+
 // CLI
 if (require.main === module) {
   const args = process.argv.slice(2);
@@ -355,6 +440,20 @@ if (require.main === module) {
       });
       break;
       
+    case 'daily':
+      sendDailySummary().then(() => console.log('Daily summary sent'));
+      break;
+      
+    case 'health':
+      const health = checkOverflowHealth();
+      console.log(`\n=== Overflow Health Check ===\n`);
+      console.log(`Status: ${health.healthy ? '🟢 Healthy' : '🔴 Issues Detected'}`);
+      if (!health.healthy) {
+        if (health.failures) console.log(`Failures: ${health.failures}`);
+        if (health.extended) console.log(`Extended overflow: ${Math.round(health.durationMs / 1000 / 60)} min`);
+      }
+      break;
+      
     default:
       console.log(`
 Rate Limit Handler for VoltAgent
@@ -366,6 +465,8 @@ Usage:
   rate_limit_handler.js reset    — Exit overflow mode
   rate_limit_handler.js test     — Test detection logic
   rate_limit_handler.js log [n]  — Show last n log entries
+  rate_limit_handler.js daily    — Send daily summary
+  rate_limit_handler.js health   — Check overflow health
 `);
   }
 }
@@ -378,5 +479,8 @@ module.exports = {
   shouldUseOverflow,
   routeRequest,
   getStats,
-  generateSummary
+  generateSummary,
+  sendDailySummary,
+  checkOverflowHealth,
+  sendAlert
 };
