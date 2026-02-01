@@ -226,14 +226,69 @@ REMEDIATION:
 
 ---
 
-## 9. Automated Coherence Check (Future)
+## 9. Logging Coherence Checks
+
+**Every coherence check MUST be logged to Notion.**
+
+### 9.1 Coherence Log DB
+
+| Field | Value |
+|-------|-------|
+| **DB ID** | `2fa35e81-2bbb-811d-88fd-c7d0a61348b9` |
+| **Location** | Covault Notion → Coherence Log |
+
+### 9.2 Log Entry Fields
+
+| Field | Content |
+|-------|---------|
+| `Log ID` | `CCHECK-YYYY-MM-DD-HHMM` |
+| `Log Type` | `Coherence Check` |
+| `Timestamp` | Check timestamp |
+| `Coherence Before` | Previous score (if known) |
+| `Coherence After` | Current score |
+| `Notes` | Issues found + remediation |
+| `Validated By` | Agent who ran the check |
+
+### 9.3 Logging Command
+
+```bash
+# Log coherence check to Notion
+curl -X POST "https://api.notion.com/v1/pages" \
+  -H "Authorization: Bearer $(cat ~/.config/notion/api_key)" \
+  -H "Notion-Version: 2022-06-28" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "parent": {"database_id": "2fa35e81-2bbb-811d-88fd-c7d0a61348b9"},
+    "properties": {
+      "Log ID": {"title": [{"text": {"content": "CCHECK-2026-02-01-1400"}}]},
+      "Log Type": {"select": {"name": "Coherence Check"}},
+      "Coherence After": {"number": 85},
+      "Notes": {"rich_text": [{"text": {"content": "All agents synced. Minor context gap resolved."}}]},
+      "Validated By": {"rich_text": [{"text": {"content": "Sandman"}}]}
+    }
+  }'
+```
+
+### 9.4 Also Log To
+
+| Location | Purpose |
+|----------|---------|
+| **Coherence Log DB** | Primary log (Notion) |
+| **Mesh Work Log DB** | If significant state change |
+| **Daily Memory** | `memory/YYYY-MM-DD.md` |
+| **Mesh Mastermind** | Announcement |
+
+---
+
+## 10. Automated Coherence Check (Future)
 
 Could build a script that:
 1. Pings all agents for status
 2. Checks Tasks DB for ownership conflicts
 3. Compares claimed tasks vs actual work
 4. Calculates score automatically
-5. Posts results to Mesh Mastermind
+5. **Logs to Coherence Log DB**
+6. Posts results to Mesh Mastermind
 
 **Location:** `voltagent/coherence_check.js` (to build)
 
