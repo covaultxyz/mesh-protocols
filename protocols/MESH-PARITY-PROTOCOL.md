@@ -1,8 +1,9 @@
-# Mesh Parity Protocol v1.0
+# Mesh Parity Protocol v1.1
 
 **Status:** ACTIVE  
 **Scope:** All mesh agents  
 **Created:** 2026-02-01  
+**Updated:** 2026-02-01 (v1.1 — Context resilience)  
 **Author:** Cassian Sandman  
 **Schedule:** Every 2 hours  
 
@@ -15,8 +16,87 @@ Ensure all mesh agents maintain parity on:
 - Core file standards (AGENTS.md, HEARTBEAT.md, SOUL.md)
 - Tooling and scripts
 - Cron/health check coverage
+- **Context recovery capability** (v1.1)
 
 Agents investigate each other. No one falls behind.
+
+---
+
+## Context Truncation Resilience (v1.1)
+
+### Why This Matters
+
+Agent context windows can truncate mid-session, losing conversation history. Parity checks must survive this.
+
+### Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                  CONTEXT-INDEPENDENT LAYER                   │
+│  (Survives truncation)                                       │
+├─────────────────────────────────────────────────────────────┤
+│  • Clawdbot Gateway — stores cron jobs, schedules           │
+│  • Parity state file — voltagent/parity_state.json          │
+│  • Memory files — memory/YYYY-MM-DD.md                      │
+│  • Core .md files — AGENTS.md, HEARTBEAT.md, SOUL.md        │
+│  • Git repos — mesh-protocols (source of truth)             │
+└─────────────────────────────────────────────────────────────┘
+                            │
+                            ▼
+┌─────────────────────────────────────────────────────────────┐
+│                  CONTEXT-DEPENDENT LAYER                     │
+│  (Can truncate)                                              │
+├─────────────────────────────────────────────────────────────┤
+│  • Conversation history                                      │
+│  • Recent decisions not yet persisted                       │
+│  • In-flight task context                                   │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### What Survives Truncation
+
+| Component | Location | Survives? |
+|-----------|----------|-----------|
+| Cron jobs | Gateway | ✅ Yes |
+| Parity schedule | Gateway cron | ✅ Yes |
+| Protocol files | Git + local | ✅ Yes |
+| Parity state | parity_state.json | ✅ Yes |
+| Daily logs | memory/*.md | ✅ Yes |
+| Core identity | SOUL.md, IDENTITY.md | ✅ Yes |
+| Conversation | Context window | ❌ No |
+
+### Recovery on Wake
+
+When an agent wakes (cron fires or message received) after potential truncation:
+
+1. **Read HEARTBEAT.md** — Contains parity check instructions
+2. **Read parity_state.json** — Last known mesh state
+3. **Read today's memory file** — Recent activity
+4. **Run parity check** — Verify current state
+5. **Resume operations** — Context recovered
+
+### Required Files for Recovery
+
+Each agent MUST maintain these for context resilience:
+
+```
+workspace/
+├── AGENTS.md          # Includes mesh collaboration section
+├── HEARTBEAT.md       # Includes parity check instructions
+├── SOUL.md            # Core identity
+├── memory/
+│   └── YYYY-MM-DD.md  # Daily activity log
+└── voltagent/
+    └── parity_state.json  # Last parity check results
+```
+
+### Parity Check Must Be Idempotent
+
+Parity checks should:
+- ✅ Work without prior context
+- ✅ Read state from files, not memory
+- ✅ Produce same results regardless of when run
+- ✅ Not depend on conversation history
 
 ---
 
@@ -173,7 +253,8 @@ When any agent updates a protocol or core file:
 ## Changelog
 
 - **v1.0** (2026-02-01) — Initial release
+- **v1.1** (2026-02-01) — Added context truncation resilience: architecture diagram, survival matrix, recovery process, required files, idempotency requirements
 
 ---
 
-*Parity over drift. No agent left behind.*
+*Parity over drift. No agent left behind. Context-resilient.*
