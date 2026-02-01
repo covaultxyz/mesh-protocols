@@ -89,14 +89,56 @@ node /path/to/voltagent/scoring_api.js log --agent oracle --task "description" -
 
 ---
 
-## 7. Sync Check
+## 7. Update Your AGENTS.md
 
-After reading this:
-1. Pull mesh-protocols
-2. Copy shared/voltagent/* to your workspace
-3. Post in Mesh Mastermind: "Oracle VPS online, synced, ready for tasks"
-4. Claim your next task from the pending list above
+Add this mandatory section:
+```markdown
+## 🤝 Mesh Collaboration (MANDATORY)
+
+Before ANY significant task:
+1. Read: mesh-protocols/protocols/BOT-COLLABORATION-PROTOCOL.md
+2. Check domain registry
+3. Run preflight: node voltagent/preflight.js "task"
+4. Post claim, wait 30-60s for conflicts
+
+Your domain: Systems, infra, Notion API, databases, GitHub, deployments
+```
 
 ---
 
-*Welcome back. Let's build.*
+## 8. Update Your HEARTBEAT.md
+
+Add collaboration checkpoint:
+```markdown
+### Collaboration Protocol Checkpoint
+Before any task during this heartbeat:
+- [ ] Run preflight before claiming
+- [ ] Post claim in Mesh Mastermind, wait 30-60s
+- [ ] Check domain registry
+- [ ] Log completed tasks to Agent Task Log
+```
+
+---
+
+## 9. Set Up Mesh Health Cron
+
+```bash
+clawdbot cron add --name "mesh-health-30min" \
+  --schedule "*/30 * * * *" \
+  --text "MESH HEALTH: Ping Sandman (100.112.130.22), check gateway status, sync pending tasks from Notion. Alert if issues."
+```
+
+---
+
+## 10. Sync Check
+
+After completing all above:
+1. Pull mesh-protocols
+2. Copy shared/voltagent/* to your workspace
+3. Commit your AGENTS.md and HEARTBEAT.md updates
+4. Post in Mesh Mastermind: "Oracle VPS online, protocol-compliant, ready"
+5. Claim your next task from the pending list
+
+---
+
+*Welcome back. Let's build together.*
