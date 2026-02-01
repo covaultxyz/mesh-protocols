@@ -336,3 +336,18 @@ Then set model override: `claude-overflow/claude-sonnet-4-20250514`
 1. Primary Anthropic account
 2. Claude Max wrapper (overflow)
 3. Manual routing through Oracle
+
+---
+
+## Pre-flight Deduplication Check (Added 2026-02-01)
+
+Before starting any significant task, agents MUST run:
+
+```bash
+node /root/clawd/voltagent/preflight.js "<task_keywords>"
+```
+
+This prevents duplicate work and ensures agents don't step on each other's work.
+
+See BOT-COLLABORATION-PROTOCOL.md for full details.
+
