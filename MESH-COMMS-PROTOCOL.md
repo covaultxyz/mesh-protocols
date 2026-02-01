@@ -57,8 +57,12 @@ The Covault mesh is a multi-agent communication system connecting AI agents acro
 
 | From | To | Endpoint | Token Location |
 |------|----|----------|----------------|
-| Sandman | Oracle | `http://100.113.222.30:18789/hooks/agent` | `/root/clawd/.secrets/oracle-token` |
-| Oracle | Sandman | `http://100.112.130.22:18789/hooks/agent` | (Oracle's config) |
+| Sandman | Oracle VPS | `http://100.113.222.30:18789/hooks/agent` | `/root/clawd/.secrets/oracle-token` |
+| Sandman | OracleLocalBot | `http://100.82.39.77:18789/hooks/agent` | `.secrets/mesh-config.json` |
+| Oracle VPS | Sandman | `http://100.112.130.22:18789/hooks/agent` | (Oracle's config) |
+| Oracle VPS | OracleLocalBot | `http://100.82.39.77:18789/hooks/agent` | (Oracle's config) |
+| OracleLocalBot | Sandman | `http://100.112.130.22:18789/hooks/agent` | (OracleLocal's config) |
+| OracleLocalBot | Oracle VPS | `http://100.113.222.30:18789/hooks/agent` | (OracleLocal's config) |
 
 **Payload format:**
 ```json
@@ -181,8 +185,11 @@ Telegram Bot: @Oracleartificialmindsetsbot
 ```yaml
 IP: 100.82.39.77
 Gateway Port: 18789
-Hooks: ⏳ Configuration pending
+Hooks Path: /hooks/agent
+Hooks Token: 4e5536f50ab6785000cac8d7022aacd7544e64d967918b9eb360ee1991d0bb7b
 Telegram Bot: @OracleLocalBot
+Telegram User ID: 7995997585
+Status: ✅ Configured (2026-02-01)
 ```
 
 ---
