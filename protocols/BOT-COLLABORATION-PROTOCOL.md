@@ -1,9 +1,9 @@
-# Bot Collaboration Protocol v2.1
+# Bot Collaboration Protocol v2.2
 
 **Status:** ACTIVE  
 **Scope:** All mesh agents (N-bot scalable)  
 **Created:** 2026-01-31  
-**Updated:** 2026-02-01 (v2.1 - Task takeover process)  
+**Updated:** 2026-02-02 (v2.2 - Work Plan Process, Challenge Mode, OKRs)  
 **Notion:** https://www.notion.so/Bot-Collaboration-Protocol-v1-0-2f935e812bbb818e8697de52fe6d416e
 
 ---
@@ -11,6 +11,103 @@
 ## ⚠️ MANDATORY
 
 This protocol governs ALL bot collaboration in the mesh. Follow always unless Ely explicitly overrides.
+
+**"Anything less is chaos."** — Ely, 2026-02-02
+
+---
+
+## 🎯 The Work Plan Process (MANDATORY)
+
+**For ANY significant task, follow this sequence:**
+
+```
+1. DRAFT WORK PLAN → Document with specific checklist
+2. ASSIGN → Who does what, which virtual teams involved
+3. POST TO MESH → Collaboration mode, share for input
+4. CHALLENGE MODE → Someone pokes holes, finds better approaches
+5. EXECUTE → Iterate as you go
+```
+
+**Skipping steps = chaos. No exceptions.**
+
+### Work Plan Requirements
+- Specific checklist items (not vague goals)
+- Owner assigned to each item
+- Virtual teams identified (Lead, Challenger, Specialist)
+- ETA per item
+- Challenge points listed (what could go wrong?)
+
+### Challenge Mode
+- At least one agent MUST review before execution
+- Challenger looks for: gaps, better approaches, risks
+- Challenger is not blocking — they're improving
+- No hurt feelings — iron sharpens iron
+
+---
+
+## 📊 Coherence Ratings (MANDATORY)
+
+**Every task output requires a Quality Gate:**
+
+```
+📊 Quality Gate
+├─ Confidence: XX/100 — How accurate/complete is this work?
+├─ Coherence: XX/100 — How well does this connect to Mesh Q priorities?
+└─ Status: ✅ PASS (both ≥90) | 🔄 AUDIT NEEDED
+```
+
+**Coherence means:** Does this task advance our core projects? Or is it busy work?
+
+Before marking complete, ask:
+- Which Mesh Q project does this serve?
+- Does this move us closer to OKRs?
+- Would Ely see this as progress or noise?
+
+**If Coherence < 90:** Stop. Reassess. Maybe this task shouldn't be done at all.
+
+---
+
+## 📊 Mesh OKRs
+
+We measure success, not just activity.
+
+**O1: Autonomous Mesh Operations**
+- KR1: Continuous Autonomous Volley Time → 60 min
+- KR2: Bot-to-Bot Handoff Success → 90%
+
+**O2: High-Quality Output**
+- KR3: Work Plan Completion Rate → 80%
+- KR4: Rework Rate → <10%
+
+**O3: Efficient Resource Use**
+- KR5: Token Efficiency → 1 task/100k tokens
+
+**OKR DB:** `2fb35e81-2bbb-81d9-b7c6-cd9fbc2826d5`
+
+---
+
+## 💳 Billing Policy
+
+**Subscription > API. Always.**
+
+- Never configure API keys without Ely approval
+- Never switch from subscription to API silently
+- If subscription auth fails → report, don't fall back to API
+
+See `protocols/BILLING-POLICY.md` for details.
+
+---
+
+## 📄 Core File Discipline
+
+**Core files = pointers only. Details live in protocols.**
+
+- AGENTS.md, TOOLS.md, HEARTBEAT.md = lean references
+- Detailed instructions → separate protocol files
+- Every line in core files burns tokens every session
+
+**Wrong:** Add 50-line policy to AGENTS.md
+**Right:** Create protocols/POLICY.md, add 1-line reference
 
 ---
 
@@ -21,6 +118,7 @@ This protocol governs ALL bot collaboration in the mesh. Follow always unless El
 3. **ITERATE** — Build on each other's work, do not start fresh
 4. **NO ISOLATION** — Never go dark on a task without communicating
 5. **NO REDUNDANCY** — Do not do the same task unless Ely explicitly asks for parallel versions
+6. **CHALLENGE** — Review each other's work before execution
 
 ---
 
@@ -221,6 +319,8 @@ When Ely requests something:
 
 Before starting ANY task:
 
+- [ ] Is there a work plan? If not, create one first
+- [ ] Has someone challenged the approach?
 - [ ] Checked registry for domain owner?
 - [ ] Checked if another bot is already doing this?
 - [ ] Posted claim and waited for conflicts?
@@ -265,7 +365,38 @@ If context is truncated, recover state from:
 - **v1.1** (2026-01-31) — Added exclusive tasks, ACK requirement, anti-collision checklist
 - **v2.0** (2026-02-01) — N-bot support, bot registry, domain-first routing, broadcast claims, removed 2-bot assumptions
 - **v2.1** (2026-02-01) — Added task takeover process for unresponsive owners (30+ min threshold, notification requirements, merge process)
+- **v2.2** (2026-02-02) — **MESH MEETING #1:** Added mandatory Work Plan Process, Challenge Mode, OKRs, Billing Policy reference, Core File Discipline, "Anything less is chaos" principle
 
 ---
 
 *Collaboration over collision. One task, one owner. N bots, one mesh.*
+
+---
+
+## Implementation Checklist
+
+### Before Starting ANY Task
+- [ ] Check for existing work plan or create one
+- [ ] Get challenge/review from another agent
+- [ ] Check Mesh Mastermind for existing claims
+- [ ] Post claim: "🎯 CLAIMING: [Task Name]"
+- [ ] Wait 30-60 seconds for conflicts
+- [ ] If conflict: Coordinate, don't race
+- [ ] Only then start work
+
+### During Task
+- [ ] Update progress in group if >30 min
+- [ ] Flag blockers immediately
+- [ ] Offer handoff if stuck
+
+### After Completion
+- [ ] Post completion notice
+- [ ] Archive/close any duplicates found
+- [ ] Log collaboration failures to Neo4j
+- [ ] Update OKR metrics if applicable
+
+### Weekly Review
+- [ ] Audit duplicate work incidents
+- [ ] Update domain registry if ownership unclear
+- [ ] Review handoff patterns for improvements
+- [ ] Review OKR progress
