@@ -70,8 +70,20 @@
 |------|----------|-------|---------|
 | protocol-refresh | `0 */6 * * *` (6h) | Oracle | Sync protocols, detect drift |
 | heartbeat | `*/30 * * * *` (30m) | Oracle | System health, proactive checks |
+| ranger-mcp | persistent (systemd) | Sandman | MCP tool bridge for Claude.ai |
 
 *See MESH-COLLABORATION-PROTOCOL.md for rules on adding new automations*
+
+---
+
+## 🌐 Ranger MCP (Live)
+
+| Property | Value |
+|----------|-------|
+| Endpoint | `https://meridian-prime.tailb5bb37.ts.net/mcp` |
+| Service | `ranger-mcp.service` (auto-restart) |
+| Tools | 16 active (8 filtered) |
+| Connect | Claude.ai → Settings → Connectors |
 
 ---
 

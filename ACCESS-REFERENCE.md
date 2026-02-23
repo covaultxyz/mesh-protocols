@@ -57,6 +57,35 @@ ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDZQ+fWnpIdSCN4z0R8skeXfcZ/OIsomQZJXbqsfZ841
 
 ---
 
+## Ranger MCP (Claude.ai Integration)
+
+| Property | Value |
+|----------|-------|
+| Endpoint | `https://meridian-prime.tailb5bb37.ts.net/mcp` |
+| Host | meridian-prime (systemd: `ranger-mcp.service`) |
+| TLS | Tailscale Funnel (auto HTTPS) |
+| Tools | 16 active (8 filtered) |
+| Write Attribution | All MIG writes attributed to `ranger` |
+
+**Connect from Claude.ai:**
+1. Settings → Connectors → Add connector
+2. Paste: `https://meridian-prime.tailb5bb37.ts.net/mcp`
+3. Name: `MERIDIAN Mesh (Ranger)`
+4. Enable from tools menu in conversation
+5. Syncs to mobile automatically
+
+**Filtered tools (write-protected):** send_email, publish_github_pages, nats_publish, session_activity, session_check_conflict, session_handoff, mig_task_create, create_page
+
+**Health check:** Ask "check mig health" — should return `neo4j: true` with a node count.
+
+**Service management:**
+```bash
+systemctl status ranger-mcp    # Check status
+systemctl restart ranger-mcp   # Restart
+```
+
+---
+
 ## Claude Max Wrapper (Overflow)
 
 | Property | Value |

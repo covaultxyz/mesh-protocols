@@ -107,6 +107,34 @@ python bridge.py
 ssh root@TARGET_IP "echo 'SENSITIVE_DATA' > /tmp/filename.txt"
 ```
 
+### Layer 5: MCP — Ranger (Claude.ai Tool Bridge)
+**Purpose:** Expose mesh tools to Claude.ai conversations via Model Context Protocol
+**Technology:** MCP server on meridian-prime, Tailscale Funnel for public HTTPS
+**Status:** ✅ Live (2026-02-23)
+
+| Property | Value |
+|----------|-------|
+| Endpoint | `https://meridian-prime.tailb5bb37.ts.net/mcp` |
+| Service | `ranger-mcp.service` (systemd, auto-restart) |
+| Tools | 16 active, 8 filtered |
+| Write Attribution | `ranger` |
+
+**When to use:**
+- Querying MIG health, graph state, and node counts from Claude.ai
+- Running mesh read operations from any Claude.ai conversation (desktop or mobile)
+- Tool-assisted workflows without SSH or webhook setup
+
+**When NOT to use:**
+- Write operations that bypass filtered tool protections
+- Anything requiring secrets (use SSH — Layer 4)
+- Bulk data operations (use direct API or webhook — Layer 2)
+
+**Filtered tools (write-protected):**
+`send_email`, `publish_github_pages`, `nats_publish`, `session_activity`, `session_check_conflict`, `session_handoff`, `mig_task_create`, `create_page`
+
+**Connect from Claude.ai:**
+Settings → Connectors → Add connector → paste endpoint URL → name it `MERIDIAN Mesh (Ranger)`
+
 ---
 
 ## Security Protocol
